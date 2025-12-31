@@ -1,39 +1,67 @@
 "use client";
-
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardContent, 
-  CardDescription 
+import { useState } from 'react';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription
 } from '@/components/ui/card';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { useGeolocation } from '@/hooks/UseGeolocation'; 
+import { useGeolocation } from '@/hooks/UseGeolocation';
 import { SearchInput } from './SearchInput';
 
 interface LeftPanelProps {
   onSearchLocation: (lat: number, lng: number) => void;
 }
 export default function LeftPanel({ onSearchLocation }: LeftPanelProps) {
-  
+
   const result = useGeolocation();
-const handleLocationFound = (lat: number, lng: number, name: string) => {
+  const handleLocationFound = (lat: number, lng: number, name: string) => {
     onSearchLocation(lat, lng); // ✅ This will now work without errors
   };
-  
 
-  const position = typeof result === 'object' && result !== null && 'position' in result 
-    ? (result as any).position 
+  const [startCoords, setStartCoords] = useState<[number, number] | null>(null);
+  const [destCoords, setDestCoords] = useState<[number, number] | null>(null);
+
+  // 2. Input Text state (What the user sees)
+  const [startText, setStartText] = useState("");
+  const [destText, setDestText] = useState("");
+  // Helper to handle GPS button
+  const handleUseMyLocation = () => {
+    if (position?.lat && position?.lng) {
+      const coords: [number, number] = [position.lat, position.lng];
+      setStartCoords(coords);
+      setStartText("My Current Location");
+      onSearchLocation(coords[0], coords[1]); // Move map to show me
+    }
+  };
+
+  // Helper to search for Destination (or manual Start)
+  const handleResolveLocation = async (query: string, type: 'start' | 'dest') => {
+    // Reuse your search logic (Local DB -> OSM)
+    // For brevity, let's assume a function 'findCoords(query)' exists
+    const result = await findCoords(query); 
+    if (result) {
+      if (type === 'start') setStartCoords([result.lat, result.lng]);
+      else setDestCoords([result.lat, result.lng]);
+      
+      onSearchLocation(result.lat, result.lng); // Hover map to result
+    }
+  };
+
+  const position = typeof result === 'object' && result !== null && 'position' in result
+    ? (result as any).position
     : result;
-    
-  const error = typeof result === 'object' && result !== null && 'error' in result 
-    ? (result as any).error 
+
+  const error = typeof result === 'object' && result !== null && 'error' in result
+    ? (result as any).error
     : null;
 
   // Format coordinates for the input display
-  const coordsString = position 
-    ? `${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}` 
+  const coordsString = position
+    ? `${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`
     : "";
 
   return (
@@ -45,14 +73,14 @@ const handleLocationFound = (lat: number, lng: number, name: string) => {
       <Card>
         <CardHeader>
           <CardDescription className='text-lg text-slate-500'>
-            Dekut navigation is an app that is meant to aid in easier navigation 
+            Dekut navigation is an app that is meant to aid in easier navigation
             for visitors and dekut students as well.
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent className="flex flex-col gap-3">
           <h3 className='font-bold text-yellow-400'>Search any location below:</h3>
-        <SearchInput onLocationFound={handleLocationFound} />
+          <SearchInput onLocationFound={handleLocationFound} />
           {error && <p className="text-red-500 text-sm">{error}</p>}
         </CardContent>
       </Card>
@@ -66,23 +94,33 @@ const handleLocationFound = (lat: number, lng: number, name: string) => {
             <label className='pl-1 font-medium'>Enter start:</label>
 
             <div className='pt-2'>
-            <button className='bg-amber-400 p-2 rounded-2xl text-black' >
-              use my location
-            </button>
+              <button 
+              onClick={handleUseMyLocation}
+              className='bg-amber-400 p-2 rounded-2xl text-black' >
+                use my location
+              </button>
             </div>
 
-            <Input 
-              placeholder='Waiting for GPS...' 
-              // 3. Changed 'location' to 'position' to match your hook
-              value={coordsString}
-              readOnly
-              className="bg-slate-50"
+            <Input
+              placeholder='Waiting for GPS...'
+              
+              value={startText}
+              onChange={(e) => setStartText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleResolveLocation(startText, 'start')}
+              className={startCoords ? "border-green-500" : ""}
+             
             />
           </div>
 
           <div className="space-y-2">
             <label className='pl-1 font-medium'>Enter Destination:</label>
-            <Input placeholder='Enter destination point' />
+            <Input 
+            placeholder='Enter destination point'
+            value={destText}
+            onChange={(e) => setDestText(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleResolveLocation(destText, 'dest')}
+            className={destCoords ? "border-green-500" : ""}
+            />
           </div>
 
           <div className="space-y-2">
@@ -96,14 +134,17 @@ const handleLocationFound = (lat: number, lng: number, name: string) => {
               <Button variant="outline" className='h-16 flex flex-col font-bold hover:bg-green-500 hover:text-white'>
                 Drive
               </Button>
-              <Button variant="outline" className='h-16 flex flex-col font-bold hover:bg-green-500 hover:text-white'>
+              <Button 
+              disabled ={!startCoords || !destCoords}
+              onClick={() => alert(`Routing from ${startCoords} to ${destCoords}`)}
+              variant="outline" className='h-16 flex flex-col font-bold hover:bg-green-500 hover:text-white'>
                 Cycle
               </Button>
             </div>
           </div>
 
           <Button className='w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6'>
-            Start Tracking
+            Generate Route
           </Button>
         </CardContent>
       </Card>
