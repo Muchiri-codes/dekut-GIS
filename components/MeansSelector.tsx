@@ -1,86 +1,85 @@
 "use client";
 
-import { useState } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { Button } from './ui/button';
+import { Footprints, Car, Bike } from 'lucide-react'; // Ensure lucide-react is installed
 
-// Speed constants for your calculations
-const SPEEDS = {
-  walk: 5,
-  drive: 40,
-  cycle: 15
-};
+// Define the interface that was missing
+interface LeftPanelProps {
+  onSearchLocation: (lat: number, lng: number) => void;
+  // State Setters from parent
+  setStartCoords: Dispatch<SetStateAction<[number, number] | null>>;
+  setDestCoords: Dispatch<SetStateAction<[number, number] | null>>;
+  setActiveMode: Dispatch<SetStateAction<'walk' | 'drive' | 'cycle' | null>>;
+  setShowRoute: Dispatch<SetStateAction<boolean>>;
+  // State Values from parent
+  startCoords: [number, number] | null;
+  destCoords: [number, number] | null;
+  activeMode: 'walk' | 'drive' | 'cycle' | null;
+}
 
-type TravelMode = 'walk' | 'drive' | 'cycle';
+const SPEEDS = { walk: 5, drive: 40, cycle: 15 };
 
-export default function LeftPanel({ onSearchLocation }: LeftPanelProps) {
-  const [startCoords, setStartCoords] = useState<[number, number] | null>(null);
-  const [destCoords, setDestCoords] = useState<[number, number] | null>(null);
-  
-  // Track which mode is currently selected
-  const [activeMode, setActiveMode] = useState<TravelMode | null>(null);
+export default function LeftPanel({ 
+  setStartCoords, 
+  setDestCoords, 
+  setActiveMode, 
+  setShowRoute,
+  startCoords,
+  destCoords,
+  activeMode 
+}: LeftPanelProps) {
+
+  // Data for the travel modes
+  const modes = [
+    { id: 'walk', label: 'Walk', icon: Footprints, speed: SPEEDS.walk },
+    { id: 'drive', label: 'Drive', icon: Car, speed: SPEEDS.drive },
+    { id: 'cycle', label: 'Cycle', icon: Bike, speed: SPEEDS.cycle },
+  ] as const;
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* ... (Search and Navigator Inputs) ... */}
-
-      <div className="space-y-2">
-        <h3 className='font-bold text-sm uppercase tracking-wider text-slate-400'>
-          Select means
+    <div className="flex flex-col gap-6">
+      <div className="space-y-3">
+        <h3 className='font-bold text-xs uppercase tracking-widest text-slate-500 pl-1'>
+          Travel Mode
         </h3>
         
-        <div className='grid grid-cols-3 gap-2'>
-          {/* WALK BUTTON */}
-          <Button 
-            variant={activeMode === 'walk' ? 'default' : 'outline'}
-            className={`h-16 flex flex-col font-bold transition-colors ${
-              activeMode === 'walk' ? 'bg-green-600 text-white' : 'hover:bg-green-500 hover:text-white'
-            }`}
-            onClick={() => setActiveMode('walk')}
-          >
-            Walk
-            <span className="text-[10px] opacity-70">{SPEEDS.walk} km/h</span>
-          </Button>
+        <div className='grid grid-cols-3 gap-3'>
+          {modes.map((mode) => {
+            const Icon = mode.icon;
+            const isActive = activeMode === mode.id;
 
-          {/* DRIVE BUTTON */}
-          <Button 
-            variant={activeMode === 'drive' ? 'default' : 'outline'}
-            className={`h-16 flex flex-col font-bold transition-colors ${
-              activeMode === 'drive' ? 'bg-green-600 text-white' : 'hover:bg-green-500 hover:text-white'
-            }`}
-            onClick={() => setActiveMode('drive')}
-          >
-            Drive
-            <span className="text-[10px] opacity-70">{SPEEDS.drive} km/h</span>
-          </Button>
-
-          {/* CYCLE BUTTON */}
-          <Button 
-            disabled={!startCoords || !destCoords}
-            variant={activeMode === 'cycle' ? 'default' : 'outline'}
-            className={`h-16 flex flex-col font-bold transition-colors ${
-              activeMode === 'cycle' ? 'bg-green-600 text-white' : 'hover:bg-green-500 hover:text-white'
-            }`}
-            onClick={() => {
-              setActiveMode('cycle');
-              // Optional: You can keep your alert here or move it to the final Start Tracking button
-              if(startCoords && destCoords) console.log("Ready to cycle!");
-            }}
-          >
-            Cycle
-            <span className="text-[10px] opacity-70">{SPEEDS.cycle} km/h</span>
-          </Button>
+            return (
+              <button 
+                key={mode.id}
+                type="button"
+                className={`h-20 flex flex-col items-center justify-center gap-1 rounded-xl font-bold transition-all border-2 ${
+                  isActive 
+                    ? 'bg-yellow-400 text-black border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.3)] scale-105' 
+                    : 'bg-slate-800/50 text-slate-400 border-slate-700 hover:border-slate-500'
+                }`}
+                onClick={() => {
+                  setActiveMode(mode.id);
+                  setShowRoute(false); // Hide the old route summary
+                }}
+              >
+                <Icon size={24} className={isActive ? 'text-black' : 'text-slate-500'} />
+                <span className="text-xs">{mode.label}</span>
+                <span className={`text-[9px] font-medium ${isActive ? 'text-black/70' : 'text-slate-600'}`}>
+                  {mode.speed} km/h
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* FINAL ACTION BUTTON */}
       <Button 
-        className='w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 mt-4'
+        className='w-full bg-yellow-400 hover:bg-yellow-500 text-black font-black py-7 rounded-xl shadow-lg active:scale-95 transition-all text-base uppercase'
         disabled={!startCoords || !destCoords || !activeMode}
-        onClick={() => {
-          alert(`Routing from ${startCoords} to ${destCoords} via ${activeMode}`);
-        }}
+        onClick={() => setShowRoute(true)}
       >
-        START NAVIGATION
+        Generate Route
       </Button>
     </div>
   );

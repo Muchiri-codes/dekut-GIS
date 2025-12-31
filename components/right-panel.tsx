@@ -7,12 +7,17 @@ interface RouteSummaryProps {
   start: [number, number];
   end: [number, number];
   mode: 'walk' | 'drive' | 'cycle';
+  distance: number;
+  duration: number; 
+  onClose:() =>void
 }
 
-export function RouteSummary({ start, end, mode }: RouteSummaryProps) {
+export function RouteSummary({distance, duration, start, end, mode, onClose }: RouteSummaryProps) {
+  const distanceInKm = (distance / 1000).toFixed(2);
+  const timeInMinutes = Math.round(duration / 60);
   // --- MOCK CALCULATION LOGIC ---
   // In a real app, these values would come from an API like OSRM or Google Routes
-  const distance = 1.8; // km
+
   const speeds = { walk: 5, cycle: 15, drive: 40 };
   const time = Math.round((distance / speeds[mode]) * 60);
   const elevation = mode === 'cycle' ? "+12m / -5m" : "+8m";
@@ -34,12 +39,12 @@ export function RouteSummary({ start, end, mode }: RouteSummaryProps) {
           <div className="bg-slate-800 p-3 rounded-lg flex flex-col items-center">
             <Timer className="text-blue-400 mb-1" size={20} />
             <span className="text-xs text-slate-400">EST. TIME</span>
-            <span className="font-bold text-white">{time} mins</span>
+            <span className="font-bold text-white">{timeInMinutes} mins</span>
           </div>
           <div className="bg-slate-800 p-3 rounded-lg flex flex-col items-center">
-            <Ruler className="text-green-400 mb-1" size={20} />
+            <Ruler className="text-green-400 mb-1" size={22} />
             <span className="text-xs text-slate-400">DISTANCE</span>
-            <span className="font-bold text-white">{distance} km</span>
+            <span className="font-bold text-white">{distanceInKm} km</span>
           </div>
         </div>
 
