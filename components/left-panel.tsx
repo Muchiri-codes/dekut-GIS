@@ -1,5 +1,6 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Card,
   CardHeader,
@@ -11,6 +12,14 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useGeolocation } from '@/hooks/UseGeolocation';
 import { SearchInput } from './SearchInput';
+import { RouteSummary } from './right-panel';
+
+const DEKUT_DB = [
+  { name: "Science Park", lat: -0.3985, lng: 36.9605 },
+  { name: "Library", lat: -0.3975, lng: 36.9620 },
+  { name: "Main Gate", lat: -0.3965, lng: 36.9595 },
+  { name: "Freedom C", lat: -0.3990, lng: 36.9615 },
+];
 
 interface LeftPanelProps {
   onSearchLocation: (lat: number, lng: number) => void;
@@ -19,11 +28,47 @@ export default function LeftPanel({ onSearchLocation }: LeftPanelProps) {
 
   const result = useGeolocation();
   const handleLocationFound = (lat: number, lng: number, name: string) => {
-    onSearchLocation(lat, lng); // ✅ This will now work without errors
+    onSearchLocation(lat, lng);
+  };
+
+  const findCoords = async (query: string) => {
+    if (!query.trim()) return null;
+
+    // 1. Try Local DB
+    const localMatch = DEKUT_DB.find(item =>
+      item.name.toLowerCase().includes(query.toLowerCase())
+    );
+    if (localMatch) return localMatch;
+
+    // 2. Try OSM Fallback
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`
+      );
+      const data = await response.json();
+      if (data && data.length > 0) {
+        return {
+          name: data[0].display_name,
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon)
+        };
+      }
+    } catch (err) {
+      console.error("Geocoding error", err);
+    }
+    return null;
   };
 
   const [startCoords, setStartCoords] = useState<[number, number] | null>(null);
   const [destCoords, setDestCoords] = useState<[number, number] | null>(null);
+  const [activeMode, setActiveMode] = useState<'walk' | 'drive' | 'cycle' |null>(null);
+  const [showRoute, setShowRoute] = useState(false);
+
+  const [startSuggestions, setStartSuggestions] = useState<typeof DEKUT_DB>([]);
+  const [destSuggestions, setDestSuggestions] = useState<typeof DEKUT_DB>([]);
+  const [showStartDrop, setShowStartDrop] = useState(false);
+  const [showDestDrop, setShowDestDrop] = useState(false);
+  const speeds = { walk: 5, drive: 40, cycle: 15 };
 
   // 2. Input Text state (What the user sees)
   const [startText, setStartText] = useState("");
@@ -38,17 +83,63 @@ export default function LeftPanel({ onSearchLocation }: LeftPanelProps) {
     }
   };
 
+  const handleInputChange = (setter: Function, value: string) => {
+  setter(value);
+  setShowRoute(false); // Hide the summary because the input has changed
+};
   // Helper to search for Destination (or manual Start)
   const handleResolveLocation = async (query: string, type: 'start' | 'dest') => {
-    // Reuse your search logic (Local DB -> OSM)
-    // For brevity, let's assume a function 'findCoords(query)' exists
-    const result = await findCoords(query); 
+    const result = await findCoords(query); // Your Database/OSM search logic
+
     if (result) {
-      if (type === 'start') setStartCoords([result.lat, result.lng]);
-      else setDestCoords([result.lat, result.lng]);
-      
-      onSearchLocation(result.lat, result.lng); // Hover map to result
+      if (type === 'start') {
+        setStartCoords([result.lat, result.lng]);
+        setStartText(result.name);
+      } else {
+        setDestCoords([result.lat, result.lng]);
+        setDestText(result.name);
+      }
+      onSearchLocation(result.lat, result.lng);
     }
+  };
+
+  useEffect(() => {
+    if (startText.length > 1 && !startCoords) {
+      const filtered = DEKUT_DB.filter(item =>
+        item.name.toLowerCase().includes(startText.toLowerCase())
+      );
+      setStartSuggestions(filtered);
+      setShowStartDrop(true);
+    } else {
+      setShowStartDrop(false);
+    }
+  }, [startText, startCoords]);
+
+  useEffect(() => {
+    if (destText.length > 1 && !destCoords) {
+      const filtered = DEKUT_DB.filter(item =>
+        item.name.toLowerCase().includes(destText.toLowerCase())
+      );
+      setDestSuggestions(filtered);
+      setShowDestDrop(true);
+    } else {
+      setShowDestDrop(false);
+    }
+  }, [destText, destCoords]);
+
+  // Handle selecting from dropdown
+  const handleSelect = (item: typeof DEKUT_DB[0], type: 'start' | 'dest') => {
+    const coords: [number, number] = [item.lat, item.lng];
+    if (type === 'start') {
+      setStartCoords(coords);
+      setStartText(item.name);
+      setShowStartDrop(false);
+    } else {
+      setDestCoords(coords);
+      setDestText(item.name);
+      setShowDestDrop(false);
+    }
+    onSearchLocation(item.lat, item.lng);
   };
 
   const position = typeof result === 'object' && result !== null && 'position' in result
@@ -94,33 +185,61 @@ export default function LeftPanel({ onSearchLocation }: LeftPanelProps) {
             <label className='pl-1 font-medium'>Enter start:</label>
 
             <div className='pt-2'>
-              <button 
-              onClick={handleUseMyLocation}
-              className='bg-amber-400 p-2 rounded-2xl text-black' >
+              <button
+                onClick={handleUseMyLocation}
+                className='bg-amber-400 p-2 rounded-2xl text-black' >
                 use my location
               </button>
             </div>
 
             <Input
               placeholder='Waiting for GPS...'
-              
               value={startText}
-              onChange={(e) => setStartText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleResolveLocation(startText, 'start')}
-              className={startCoords ? "border-green-500" : ""}
-             
+              onChange={(e) => {
+                setStartText(e.target.value);
+                if (startCoords) setStartCoords(null); 
+              }}
+              className={startCoords ? "border-green-500 bg-green-900/10" : "border-slate-700"}
             />
+            {showStartDrop && startSuggestions.length > 0 && (
+              <ul className="absolute z-50 w-full bg-slate-900 border border-slate-700 rounded-md shadow-xl mt-1 max-h-40 overflow-auto">
+                {startSuggestions.map((item) => (
+                  <li 
+                    key={item.name}
+                    onClick={() => handleSelect(item, 'start')}
+                    className="p-2 hover:bg-slate-800 cursor-pointer text-sm text-slate-200 border-b border-slate-800 last:border-0"
+                  >
+                    {item.name}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="space-y-2">
             <label className='pl-1 font-medium'>Enter Destination:</label>
-            <Input 
-            placeholder='Enter destination point'
-            value={destText}
-            onChange={(e) => setDestText(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleResolveLocation(destText, 'dest')}
-            className={destCoords ? "border-green-500" : ""}
+            <Input
+              placeholder='Enter destination point'
+              value={destText}
+             onChange={(e) => {
+                setDestText(e.target.value);
+                if (destCoords) setDestCoords(null);
+              }}
+              className={destCoords ? "border-blue-500 bg-blue-900/10" : "border-slate-700"}
             />
+           {showDestDrop && destSuggestions.length > 0 && (
+              <ul className="absolute z-50 w-full bg-slate-900 border border-slate-700 rounded-md shadow-xl mt-1 max-h-40 overflow-auto">
+                {destSuggestions.map((item) => (
+                  <li 
+                    key={item.name}
+                    onClick={() => handleSelect(item, 'dest')}
+                    className="p-2 hover:bg-slate-800 cursor-pointer text-sm text-slate-200 border-b border-slate-800 last:border-0"
+                  >
+                    {item.name}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -128,22 +247,50 @@ export default function LeftPanel({ onSearchLocation }: LeftPanelProps) {
               Select means
             </h3>
             <div className='grid grid-cols-3 gap-2'>
-              <Button variant="outline" className='h-16 flex flex-col font-bold hover:bg-green-500 hover:text-white'>
+              <Button
+                variant={activeMode === 'walk' ? 'default' : 'outline'}
+                className={`h-16 flex flex-col font-bold transition-all ${activeMode === 'walk' ? 'bg-green-600 text-white' : 'hover:bg-green-500 hover:text-white'
+                  }`}
+                onClick={() => setActiveMode('walk')}
+              >
                 Walk
               </Button>
-              <Button variant="outline" className='h-16 flex flex-col font-bold hover:bg-green-500 hover:text-white'>
+
+              {/* DRIVE */}
+              <Button
+                variant={activeMode === 'drive' ? 'default' : 'outline'}
+                className={`h-16 flex flex-col font-bold transition-all ${activeMode === 'drive' ? 'bg-green-600 text-white' : 'hover:bg-green-500 hover:text-white'
+                  }`}
+                onClick={() => setActiveMode('drive')}
+              >
                 Drive
               </Button>
-              <Button 
-              disabled ={!startCoords || !destCoords}
-              onClick={() => alert(`Routing from ${startCoords} to ${destCoords}`)}
-              variant="outline" className='h-16 flex flex-col font-bold hover:bg-green-500 hover:text-white'>
+
+              {/* CYCLE */}
+              <Button
+                disabled={!startCoords || !destCoords}
+                variant={activeMode === 'cycle' ? 'default' : 'outline'}
+                className={`h-16 flex flex-col font-bold transition-all ${activeMode === 'cycle' ? 'bg-green-600 text-white' : 'hover:bg-green-500 hover:text-white'
+                  }`}
+                onClick={() => setActiveMode('cycle')}
+              >
                 Cycle
               </Button>
             </div>
           </div>
-
-          <Button className='w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6'>
+          <AnimatePresence>
+            {showRoute && startCoords && destCoords && activeMode && (
+              <RouteSummary
+                start={startCoords}
+                end={destCoords}
+                mode={activeMode}
+              />
+            )}
+          </AnimatePresence>
+          <Button className='w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6'
+            disabled={!startCoords || !destCoords || !activeMode}
+            onClick={() =>setShowRoute(true)}
+            >
             Generate Route
           </Button>
         </CardContent>

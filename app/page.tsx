@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import LeftPanel from "@/components/left-panel";
-import RightPanel from "@/components/right-panel";
+import { RouteSummary } from "@/components/right-panel";
 import Map from "@/components/map";
 import Header from "@/components/Header";
 
@@ -23,7 +23,7 @@ const [mapTarget, setMapTarget] = useState<[number, number] | null>(null);
         </div>
 
         <div className="w-1/5 bg-green-50 border-l p-2">
-          <RightPanel />
+          <RouteSummary />
         </div>
       </div>
     </>
