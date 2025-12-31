@@ -10,9 +10,17 @@ import {
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useGeolocation } from '@/hooks/UseGeolocation'; 
+import { SearchInput } from './SearchInput';
 
-export default function LeftPanel() {
+interface LeftPanelProps {
+  onSearchLocation: (lat: number, lng: number) => void;
+}
+export default function LeftPanel({ onSearchLocation }: LeftPanelProps) {
+  
   const result = useGeolocation();
+const handleLocationFound = (lat: number, lng: number, name: string) => {
+    onSearchLocation(lat, lng); // ✅ This will now work without errors
+  };
   
 
   const position = typeof result === 'object' && result !== null && 'position' in result 
@@ -36,7 +44,7 @@ export default function LeftPanel() {
 
       <Card>
         <CardHeader>
-          <CardDescription className='text-lg text-slate-200'>
+          <CardDescription className='text-lg text-slate-500'>
             Dekut navigation is an app that is meant to aid in easier navigation 
             for visitors and dekut students as well.
           </CardDescription>
@@ -44,19 +52,7 @@ export default function LeftPanel() {
         
         <CardContent className="flex flex-col gap-3">
           <h3 className='font-bold text-yellow-400'>Search any location below:</h3>
-          <Input 
-            type='text' 
-            placeholder='Enter place name...' 
-            className='bg-slate-800 text-white border-slate-700'
-          />
-          <Button 
-            className='bg-amber-400 text-green-900 hover:bg-amber-500' 
-            onClick={() => {
-              if (position) alert(`Current Location: ${coordsString}`);
-            }}
-          >
-            {position ? "Location Active" : "Searching for GPS..."}
-          </Button>
+        <SearchInput onLocationFound={handleLocationFound} />
           {error && <p className="text-red-500 text-sm">{error}</p>}
         </CardContent>
       </Card>
@@ -68,6 +64,13 @@ export default function LeftPanel() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <label className='pl-1 font-medium'>Enter start:</label>
+
+            <div className='pt-2'>
+            <button className='bg-amber-400 p-2 rounded-2xl text-black' >
+              use my location
+            </button>
+            </div>
+
             <Input 
               placeholder='Waiting for GPS...' 
               // 3. Changed 'location' to 'position' to match your hook
