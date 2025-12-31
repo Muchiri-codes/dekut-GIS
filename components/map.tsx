@@ -13,6 +13,7 @@ interface MapProps {
   startPoint: [number, number] | null;
   endPoint: [number, number] | null;
   showRoute: boolean;
+  activeMode: 'walk' | 'drive' | 'cycle' | null;
   setRouteData: (data: { distance: number; duration: number }) => void;
 }
 // Default Icon
@@ -50,7 +51,7 @@ function MapController({ center }: { center: [number, number] | null }) {
   return null;
 }
 
-export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, setRouteData}: MapProps) {
+export default function Map({ geolocateCenter, startPoint, endPoint, showRoute,activeMode, setRouteData}: MapProps) {
   const { position } = useGeolocation();
   const dkuCenter: [number, number] = [-0.397, 36.961];
 
@@ -80,7 +81,7 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
           </Marker>
         ))}
 
-        {/* 2. USER GEOLOCATION */}
+      
         {position?.lat && position?.lng && (
           <Marker position={[position.lat, position.lng]} icon={customIcon}>
             <Popup>You are here</Popup>
@@ -112,6 +113,7 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
           <RoutingMachine 
           start={startPoint} 
           end={endPoint}
+          mode={activeMode}
           onRouteFound={(data) => setRouteData(data)} />
         )}
 

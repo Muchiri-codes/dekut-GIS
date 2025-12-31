@@ -24,8 +24,10 @@ export default function Home() {
 }, []);
 
   return (
+    <>
+     <Header />
     <main className="flex h-screen w-full bg-slate-950 overflow-hidden">
-    
+   
       <div className="w-[350px] h-full border-r border-slate-800 z-20 bg-slate-900">
         <LeftPanel
           onSearchLocation={(lat, lng) => setMapCenter([lat, lng])}
@@ -47,6 +49,7 @@ export default function Home() {
           endPoint={destCoords}
           showRoute={showRoute}
           setRouteData={handleRouteFound}
+          activeMode={activeMode}
         />
 
 
@@ -69,5 +72,6 @@ export default function Home() {
         </AnimatePresence>
       </div>
     </main>
+    </>
   );
 }
