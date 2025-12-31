@@ -84,7 +84,8 @@ export default function LeftPanel({
   // 2. Input Text state (What the user sees)
   const [startText, setStartText] = useState("");
   const [destText, setDestText] = useState("");
-  // Helper to handle GPS button
+
+  //  GPS button
   const handleUseMyLocation = () => {
     if (position?.lat && position?.lng) {
       const coords: [number, number] = [position.lat, position.lng];
@@ -96,7 +97,7 @@ export default function LeftPanel({
 
   const handleInputChange = (setter: Function, value: string) => {
     setter(value);
-    setShowRoute(false); // Hide the summary because the input has changed
+    setShowRoute(false); 
   };
   // Helper to search for Destination (or manual Start)
   const handleResolveLocation = async (query: string, type: 'start' | 'dest') => {

@@ -15,8 +15,6 @@ interface RouteSummaryProps {
 export function RouteSummary({distance, duration, start, end, mode, onClose }: RouteSummaryProps) {
   const distanceInKm = (distance / 1000).toFixed(2);
   const timeInMinutes = Math.round(duration / 60);
-  // --- MOCK CALCULATION LOGIC ---
-  // In a real app, these values would come from an API like OSRM or Google Routes
 
   const speeds = { walk: 5, cycle: 15, drive: 40 };
   const time = Math.round((distance / speeds[mode]) * 60);

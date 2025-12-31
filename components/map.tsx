@@ -6,7 +6,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useGeolocation } from "@/hooks/UseGeolocation";
 import RoutingMachine from "./RoutingMachine";
-import { useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface MapProps {
   geolocateCenter: [number, number] | null;
@@ -51,15 +51,24 @@ function MapController({ center }: { center: [number, number] | null }) {
   return null;
 }
 
-export default function Map({ geolocateCenter, startPoint, endPoint, showRoute,activeMode, setRouteData}: MapProps) {
+export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, activeMode, setRouteData }: MapProps) {
   const { position } = useGeolocation();
   const dkuCenter: [number, number] = [-0.397, 36.961];
 
-  const places = useMemo(() => [
-    { name: "Library", lat: -0.3975, lng: 36.9620 },
-    { name: "Science Park", lat: -0.3985, lng: 36.9605 },
-    { name: "Main Gate", lat: -0.3965, lng: 35.9595 },
-  ], []);
+  const [places, setPlaces] = useState<any[]>([]);
+  useEffect(() => {
+    async function fetchLandmarks() {
+      try {
+        const response = await fetch('/api/landmarks');
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        setPlaces(data);
+      } catch (error) {
+        console.error("Error loading landmarks:", error);
+      }
+    }
+    fetchLandmarks();
+  }, []);
 
   return (
     <div style={{ height: "100%", width: "100%", position: "relative" }}>
@@ -75,13 +84,17 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute,a
         />
 
         {/* 1. CAMPUS LANDMARKS */}
-        {places.map((place) => (
-          <Marker key={place.name} position={[place.lat, place.lng]} icon={customIcon}>
-            <Popup>{place.name}</Popup>
+        {places.map((place, index) => (
+          // Note: Using index as key if MongoDB _id isn't available, but place._id is better
+          <Marker key={place._id || index} position={[place.lat, place.lng]} icon={customIcon}>
+            <Popup>
+              <strong>{place.name}</strong><br />
+              {place.description || "Campus Landmark"}
+            </Popup>
           </Marker>
         ))}
 
-      
+        {/* User Location */}
         {position?.lat && position?.lng && (
           <Marker position={[position.lat, position.lng]} icon={customIcon}>
             <Popup>You are here</Popup>
@@ -101,20 +114,22 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute,a
             <Popup>Start Point</Popup>
           </Marker>
         )}
-        
+
         {endPoint && (
           <Marker position={endPoint} icon={endIcon}>
             <Popup>Destination</Popup>
           </Marker>
         )}
 
-      
-        {showRoute && startPoint && endPoint && (
+
+        {/* Routing Logic */}
+        {showRoute && startPoint && endPoint && activeMode && (
           <RoutingMachine 
-          start={startPoint} 
-          end={endPoint}
-          mode={activeMode}
-          onRouteFound={(data) => setRouteData(data)} />
+            start={startPoint} 
+            end={endPoint}
+            mode={activeMode}
+            onRouteFound={(data) => setRouteData(data)} 
+          />
         )}
 
         <MapController center={geolocateCenter} />

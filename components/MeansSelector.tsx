@@ -2,9 +2,8 @@
 
 import { Dispatch, SetStateAction } from 'react';
 import { Button } from './ui/button';
-import { Footprints, Car, Bike } from 'lucide-react'; // Ensure lucide-react is installed
+import { Footprints, Car, Bike } from 'lucide-react'; 
 
-// Define the interface that was missing
 interface LeftPanelProps {
   onSearchLocation: (lat: number, lng: number) => void;
   // State Setters from parent
