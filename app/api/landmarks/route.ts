@@ -1,11 +1,11 @@
 
-import clientPromise from "@/lib/db";
+import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     const client = await clientPromise;
-    const db = client.db("dekut_nav");
+    const db = client.db("dekut_landmarks");
 
     // Fetch all landmarks from your "places" collection
     const landmarks = await db.collection("places").find({}).toArray();

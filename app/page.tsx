@@ -1,10 +1,13 @@
 "use client";
 import { useState, useCallback} from 'react';
 import LeftPanel from '@/components/left-panel';
-import Map from '@/components/map';
+import dynamic from "next/dynamic";
 import { RouteSummary } from '@/components/right-panel';
 import { AnimatePresence } from 'framer-motion';
 import Header from '@/components/Header';
+const Map = dynamic(() => import("@/components/map"), {
+  ssr: false,
+});
 
 export default function Home() {
   const [startCoords, setStartCoords] = useState<[number, number] | null>(null);
@@ -55,7 +58,7 @@ export default function Home() {
 
         <AnimatePresence>
           {showRoute && startCoords && destCoords && activeMode && routeData && (
-            <div className="absolute top-4 right-4 z-[1001] w-[320px] pointer-events-auto">
+            <div className="absolute top-4 right-4 z-1000 w-[320px] pointer-events-auto">
               <RouteSummary
                 start={startCoords}
                 end={destCoords}

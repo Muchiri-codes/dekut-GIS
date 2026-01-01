@@ -1,4 +1,3 @@
-// lib/mongodb.ts
 import { MongoClient } from 'mongodb';
 
 if (!process.env.MONGODB_URI) {
@@ -8,7 +7,7 @@ if (!process.env.MONGODB_URI) {
 const uri = process.env.MONGODB_URI;
 const options = {};
 
-let client;
+let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
 if (process.env.NODE_ENV === 'development') {
@@ -18,12 +17,20 @@ if (process.env.NODE_ENV === 'development') {
 
   if (!globalWithMongo._mongoClientPromise) {
     client = new MongoClient(uri, options);
-    globalWithMongo._mongoClientPromise = client.connect();
+  
+    globalWithMongo._mongoClientPromise = client.connect().then((client) => {
+      console.log('✅ MongoDB Connected Successfully (Development)');
+      return client;
+    });
   }
   clientPromise = globalWithMongo._mongoClientPromise;
 } else {
   client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+  // Add .then() to log success
+  clientPromise = client.connect().then((client) => {
+    console.log('--- ✅ MongoDB Connected Successfully (Production) ---');
+    return client;
+  });
 }
 
 export default clientPromise;
