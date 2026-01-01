@@ -66,7 +66,6 @@ export default function RoutingMachine({ start, end, onRouteFound, mode }: Routi
         if (container) container.remove();
       }
     };
-  }, [map, start, end, mode]); // Added onRouteFound to dependencies
-
+  }, [map, start, end, mode]); 
   return null; 
 }
