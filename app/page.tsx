@@ -15,16 +15,17 @@ export default function Home() {
   const [activeMode, setActiveMode] = useState<'walk' | 'drive' | 'cycle' | null>(null);
   const [showRoute, setShowRoute] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
-  const [routeData, setRouteData] = useState<{ distance: number, duration: number } | null>(null);
-  const handleRouteFound = useCallback((data: { distance: number; duration: number }) => {
+
+  const [routeData, setRouteData] = useState<{ distance: number, duration: number, steps:any[], routeName:string } | null>(null);
+  const handleRouteFound = useCallback((data: { distance: number; duration: number, steps:any[], routeName:string }) => {
   setRouteData(prev => {
     
-    if (prev?.distance === data.distance && prev?.duration === data.duration) {
-      return prev;
-    }
-    return data;
-  });
-}, []);
+   if (prev?.distance === data.distance && prev?.routeName === data.routeName) {
+        return prev;
+      }
+      return data;
+    });
+  }, []);
 
   return (
     <>
@@ -65,6 +66,8 @@ export default function Home() {
                 mode={activeMode}
                 distance={routeData.distance}
                 duration={routeData.duration}
+                steps ={routeData.steps}
+                routeName= {routeData.routeName}
                 onClose={() => {
                   setShowRoute(false);
                   setRouteData(null);

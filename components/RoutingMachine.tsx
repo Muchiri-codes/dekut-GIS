@@ -9,19 +9,19 @@ interface RoutingMachineProps {
   start: [number, number];
   end: [number, number];
   mode: 'walk' | 'drive' | 'cycle' | null;
-  onRouteFound: (data: { distance: number; duration: number }) => void;
+  onRouteFound: (data: { distance: number; duration: number; steps: any[]; 
+    routeName: string }) => void;
 }
 
 export default function RoutingMachine({ start, end, onRouteFound, mode }: RoutingMachineProps) {
   const map = useMap();
   const lastRouteRef = useRef<string>("");
-  // ✅ Store the control in a ref to manage its lifecycle safely
   const controlRef = useRef<L.Routing.Control | null>(null);
 
   useEffect(() => {
     if (!map || !start || !end || !mode) return;
 
-    // Set up the OSRM Router with the correct profile
+    
     const router = L.Routing.osrmv1({
       serviceUrl: "https://router.project-osrm.org/route/v1",
       profile: mode === 'walk' ? 'foot' : mode === 'cycle' ? 'bicycle' : 'driving',
@@ -58,12 +58,17 @@ export default function RoutingMachine({ start, end, onRouteFound, mode }: Routi
     }
 
     routingControl.on('routesfound', (e) => {
-      const summary = e.routes[0].summary;
+      const route = e.routes[0];
+      const summary = route.summary;
+      const instructions = route.instructions; 
+      const routeName = route.name;
       if (lastRouteRef.current !== routeKey) {
         lastRouteRef.current = routeKey;
         onRouteFound({
           distance: summary.totalDistance,
-          duration: summary.totalTime
+          duration: summary.totalTime,
+          steps: instructions, 
+          routeName: routeName
         });
       }
     });

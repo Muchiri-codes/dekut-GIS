@@ -14,7 +14,8 @@ interface MapProps {
   endPoint: [number, number] | null;
   showRoute: boolean;
   activeMode: 'walk' | 'drive' | 'cycle' | null;
-  setRouteData: (data: { distance: number; duration: number }) => void;
+  setRouteData: (data: { distance: number; duration: number;steps: any[]; 
+    routeName: string }) => void;
 }
 
 if (typeof window !== 'undefined') {
