@@ -3,19 +3,13 @@
 import React, { useState, KeyboardEvent } from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { Search } from 'lucide-react'; // Optional: for a search icon
+import { Search, Loader2 } from 'lucide-react';
+// Import your server action
+import { getLandmarksFromDB } from '@/app/action'; 
 
 interface SearchInputProps {
   onLocationFound: (lat: number, lng: number, name: string) => void;
 }
-
-// Mock Database of DeKUT locations
-const DEKUT_DB = [
-  { name: "Science Park", lat: -0.3985, lng: 36.9605 },
-  { name: "Library", lat: -0.3975, lng: 36.9620 },
-  { name: "Freedom C", lat: -0.3990, lng: 36.9615 },
-  { name: "Main Gate", lat: -0.3965, lng: 36.9595 },
-];
 
 export function SearchInput({ onLocationFound }: SearchInputProps) {
   const [query, setQuery] = useState("");
@@ -25,33 +19,23 @@ export function SearchInput({ onLocationFound }: SearchInputProps) {
     if (!query.trim()) return;
     setLoading(true);
 
-    // 1. Check Local Database
-    const localMatch = DEKUT_DB.find(item => 
-      item.name.toLowerCase().includes(query.toLowerCase())
-    );
-
-    if (localMatch) {
-      onLocationFound(localMatch.lat, localMatch.lng, localMatch.name);
-      setLoading(false);
-      return;
-    }
-
-    // 2. Fallback to OpenStreetMap (Nominatim API)
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`
-      );
-      const data = await response.json();
+      // 1. Search across all MongoDB collections via the Server Action
+      const results = await getLandmarksFromDB(query);
 
-      if (data && data.length > 0) {
-        const result = data[0];
-        onLocationFound(parseFloat(result.lat), parseFloat(result.lon), result.display_name);
+      if (results && results.length > 0) {
+        // Pick the best match (first result)
+        const bestMatch = results[0];
+        onLocationFound(bestMatch.lat, bestMatch.lng, bestMatch.name);
+        
+        // Optional: clear query after finding
+        setQuery(""); 
       } else {
-        alert("Location not found in DeKUT or OSM.");
+        alert("Location not found in the DeKUT database.");
       }
     } catch (error) {
-      console.error("Search failed:", error);
-      alert("Search error. Please check your connection.");
+      console.error("Database search failed:", error);
+      alert("Error connecting to the database.");
     } finally {
       setLoading(false);
     }
@@ -68,11 +52,11 @@ export function SearchInput({ onLocationFound }: SearchInputProps) {
       <div className="relative">
         <Input 
           type="text"
-          placeholder="Search campus or city..."
+          placeholder="Search campus buildings..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="bg-slate-800 text-white border-slate-700 pr-10"
+          className="bg-slate-800 text-white border-slate-700 pr-10 focus:ring-amber-400"
         />
         <Button 
           size="sm"
@@ -80,9 +64,14 @@ export function SearchInput({ onLocationFound }: SearchInputProps) {
           onClick={performSearch}
           disabled={loading}
         >
-          {loading ? "..." : <Search size={16} />}
+          {loading ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
         </Button>
       </div>
+      
+      {/* Visual Indicator of DB status */}
+      <p className="text-[10px] text-slate-500 pl-1 uppercase font-bold tracking-tighter">
+        Connected to DeKUT Landmark Registry
+      </p>
     </div>
   );
 }
