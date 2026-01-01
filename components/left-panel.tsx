@@ -12,14 +12,8 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useGeolocation } from '@/hooks/UseGeolocation';
 import { SearchInput } from './SearchInput';
-import { RouteSummary } from './right-panel';
+import { getLandmarksFromDB } from '@/app/action';
 
-const DEKUT_DB = [
-  { name: "Science Park", lat: -0.3985, lng: 36.9605 },
-  { name: "Library", lat: -0.3975, lng: 36.9620 },
-  { name: "Main Gate", lat: -0.3965, lng: 36.9595 },
-  { name: "Freedom C", lat: -0.3990, lng: 36.9615 },
-];
 
 interface LeftPanelProps {
   onSearchLocation: (lat: number, lng: number) => void;
@@ -30,7 +24,13 @@ interface LeftPanelProps {
   startCoords: [number, number] | null;
   destCoords: [number, number] | null;
   activeMode: 'walk' | 'drive' | 'cycle' | null;
-  showRoute: boolean; 
+  showRoute: boolean;
+}
+
+interface Landmark {
+  name: string;
+  lat: number;
+  lng: number;
 }
 export default function LeftPanel({
   onSearchLocation,
@@ -50,11 +50,9 @@ export default function LeftPanel({
   const findCoords = async (query: string) => {
     if (!query.trim()) return null;
 
-    // 1. Try Local DB
-    const localMatch = DEKUT_DB.find(item =>
-      item.name.toLowerCase().includes(query.toLowerCase())
-    );
-    if (localMatch) return localMatch;
+    // 1. Try Live MongoDB
+    const results = await getLandmarksFromDB(query);
+    if (results.length > 0) return results[0];
 
     // 2. Try OSM Fallback
     try {
@@ -75,8 +73,8 @@ export default function LeftPanel({
     return null;
   };
 
-  const [startSuggestions, setStartSuggestions] = useState<typeof DEKUT_DB>([]);
-  const [destSuggestions, setDestSuggestions] = useState<typeof DEKUT_DB>([]);
+  const [startSuggestions, setStartSuggestions] = useState<{ name: string, lat: number, lng: number }[]>([]);
+  const [destSuggestions, setDestSuggestions] = useState<{ name: string, lat: number, lng: number }[]>([]);
   const [showStartDrop, setShowStartDrop] = useState(false);
   const [showDestDrop, setShowDestDrop] = useState(false);
   const speeds = { walk: 5, drive: 40, cycle: 15 };
@@ -97,7 +95,7 @@ export default function LeftPanel({
 
   const handleInputChange = (setter: Function, value: string) => {
     setter(value);
-    setShowRoute(false); 
+    setShowRoute(false);
   };
   // Helper to search for Destination (or manual Start)
   const handleResolveLocation = async (query: string, type: 'start' | 'dest') => {
@@ -123,32 +121,36 @@ export default function LeftPanel({
     destCoords.length === 2 &&
     activeMode !== null;
   useEffect(() => {
-    if (startText.length > 1 && !startCoords) {
-      const filtered = DEKUT_DB.filter(item =>
-        item.name.toLowerCase().includes(startText.toLowerCase())
-      );
-      setStartSuggestions(filtered);
-      setShowStartDrop(true);
-    } else {
-      setShowStartDrop(false);
-    }
+    const delayDebounceFn = setTimeout(async () => {
+      if (startText.length > 1 && !startCoords) {
+        const results = await getLandmarksFromDB(startText); // Query MongoDB
+        setStartSuggestions(results);
+        setShowStartDrop(true);
+      } else {
+        setShowStartDrop(false);
+      }
+    }, 300);
+    return () => clearTimeout(delayDebounceFn);// Debounce to prevent too many DB calls
   }, [startText, startCoords]);
 
   useEffect(() => {
-    if (destText.length > 1 && !destCoords) {
-      const filtered = DEKUT_DB.filter(item =>
-        item.name.toLowerCase().includes(destText.toLowerCase())
-      );
-      setDestSuggestions(filtered);
-      setShowDestDrop(true);
-    } else {
-      setShowDestDrop(false);
-    }
+    const delayDebounceFn = setTimeout(async () => {
+      if (destText.length > 1 && !destCoords) {
+        const results = await getLandmarksFromDB(destText); // Query MongoDB
+        setDestSuggestions(results);
+        setShowDestDrop(true);
+      } else {
+        setShowDestDrop(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
   }, [destText, destCoords]);
 
   // Handle selecting from dropdown
-  const handleSelect = (item: typeof DEKUT_DB[0], type: 'start' | 'dest') => {
+  const handleSelect = (item: Landmark, type: 'start' | 'dest') => {
     const coords: [number, number] = [item.lat, item.lng];
+
     if (type === 'start') {
       setStartCoords(coords);
       setStartText(item.name);
@@ -158,6 +160,8 @@ export default function LeftPanel({
       setDestText(item.name);
       setShowDestDrop(false);
     }
+
+    // This moves the map to the coordinates pulled from your local MongoDB
     onSearchLocation(item.lat, item.lng);
   };
 
@@ -235,13 +239,12 @@ export default function LeftPanel({
             )}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 relative">
             <label className='pl-1 font-medium'>Enter Destination:</label>
             <Input
               placeholder='Enter destination point'
               value={destText}
               onChange={(e) => {
-                // ✅ Call the helper here too
                 handleInputChange(setDestText, e.target.value);
                 if (destCoords) setDestCoords(null);
               }}
@@ -271,21 +274,32 @@ export default function LeftPanel({
                 <Button
                   key={mode}
                   variant={activeMode === mode ? 'default' : 'outline'}
-                  className={`h-16 flex flex-col font-bold transition-all ${activeMode === mode ? 'bg-green-600 text-white' : 'hover:bg-green-500 hover:text-white'
+                  className={`h-20 flex flex-col items-center justify-center font-bold transition-all shadow-sm ${activeMode === mode
+                      ? 'bg-green-600 text-white ring-2 ring-green-400'
+                      : 'hover:bg-green-500 hover:text-white border-slate-700'
                     }`}
                   onClick={() => {
-                    setActiveMode(mode as any);
-                    setShowRoute(false); // ✅ Hide the summary when mode changes
+                    setActiveMode(mode as 'walk' | 'drive' | 'cycle');
+                    setShowRoute(false);
                   }}
                 >
-                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  {/* Mode Name */}
+                  <span className="text-base">
+                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  </span>
+
+                  {/* Dynamic Speed Label */}
+                  <span className={`text-[10px] mt-1 font-medium ${activeMode === mode ? 'text-green-100' : 'text-slate-400'
+                    }`}>
+                    {speeds[mode as keyof typeof speeds]} km/h
+                  </span>
                 </Button>
               ))}
             </div>
           </div>
 
           <Button className='w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6'
-            disabled={!startCoords || !destCoords || !activeMode}
+            disabled={!isRouteReady}
             onClick={() => setShowRoute(true)}
           >
             Generate Route
