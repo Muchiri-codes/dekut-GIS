@@ -122,8 +122,8 @@ export default function LeftPanel({
     activeMode !== null;
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
-      if (startText.length > 1 && !startCoords) {
-        const results = await getLandmarksFromDB(startText); // Query MongoDB
+      if (startText.length > 1) {
+        const results = await getLandmarksFromDB(startText);
         setStartSuggestions(results);
         setShowStartDrop(true);
       } else {
@@ -131,7 +131,7 @@ export default function LeftPanel({
       }
     }, 300);
     return () => clearTimeout(delayDebounceFn);// Debounce to prevent too many DB calls
-  }, [startText, startCoords]);
+  }, [startText]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
@@ -221,6 +221,7 @@ export default function LeftPanel({
               onChange={(e) => {
                 handleInputChange(setStartText, e.target.value);
                 if (startCoords) setStartCoords(null);
+                setShowRoute(false);
               }}
               className={startCoords ? "border-green-500 bg-green-900/10" : "border-slate-700"}
             />

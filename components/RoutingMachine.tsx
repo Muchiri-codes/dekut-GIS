@@ -8,22 +8,27 @@ import "leaflet-routing-machine";
 interface RoutingMachineProps {
   start: [number, number];
   end: [number, number];
-  mode: 'walk' | 'drive' | 'cycle'|null;
+  mode: 'walk' | 'drive' | 'cycle' | null;
   onRouteFound: (data: { distance: number; duration: number }) => void;
 }
 
 export default function RoutingMachine({ start, end, onRouteFound, mode }: RoutingMachineProps) {
- const map = useMap();
- const lastRouteRef = useRef<string>("");
+  const map = useMap();
+  const lastRouteRef = useRef<string>("");
+  // ✅ Store the control in a ref to manage its lifecycle safely
+  const controlRef = useRef<L.Routing.Control | null>(null);
+
   useEffect(() => {
-    if (!map || !start || !end) return;
+    if (!map || !start || !end || !mode) return;
 
+    // Set up the OSRM Router with the correct profile
     const router = L.Routing.osrmv1({
-    serviceUrl: "https://router.project-osrm.org/route/v1",
-    profile: mode === 'walk' ? 'foot' : mode === 'cycle' ? 'bicycle' : 'driving',
-  });
+      serviceUrl: "https://router.project-osrm.org/route/v1",
+      profile: mode === 'walk' ? 'foot' : mode === 'cycle' ? 'bicycle' : 'driving',
+    });
 
-    const routeKey = `${start.join(',')}-${end.join(',')}`;
+    const routeKey = `${start.join(',')}-${end.join(',')}-${mode}`;
+
     // Create the routing control
     const routingControl = L.Routing.control({
       router: router,
@@ -36,19 +41,25 @@ export default function RoutingMachine({ start, end, onRouteFound, mode }: Routi
         extendToWaypoints: true,
         missingRouteTolerance: 10
       },
-     
-      show: false, 
+      show: false,
       addWaypoints: false,
       routeWhileDragging: false,
       fitSelectedRoutes: true,
-      itineraryClassName: "hidden", 
-    }).addTo(map);
+      // @ts-ignore - Leaflet types sometimes miss this
+      itineraryClassName: "hidden",
+    });
+
+    controlRef.current = routingControl;
+
+    try {
+      routingControl.addTo(map);
+    } catch (err) {
+      console.error("Leaflet routing attachment error:", err);
+    }
 
     routingControl.on('routesfound', (e) => {
-  
       const summary = e.routes[0].summary;
-      
-    if (lastRouteRef.current !== routeKey) {
+      if (lastRouteRef.current !== routeKey) {
         lastRouteRef.current = routeKey;
         onRouteFound({
           distance: summary.totalDistance,
@@ -57,15 +68,35 @@ export default function RoutingMachine({ start, end, onRouteFound, mode }: Routi
       }
     });
 
-    return () => {
-      if (map && routingControl) {
-        map.removeControl(routingControl);
-        
+return () => {
+  if (controlRef.current && map) {
+    try {
+      const control = controlRef.current;
       
-        const container = document.querySelector('.leaflet-routing-container');
-        if (container) container.remove();
+      if (control.getPlan()) {
+        control.getPlan().setWaypoints([]);
       }
-    };
-  }, [map, start, end, mode]); 
-  return null; 
+
+      if ((map as any)._loaded) {
+        map.removeControl(control);
+      }
+    } catch (e) {
+      console.debug("Routing cleanup: Handled internal Leaflet race condition.");
+    } finally {
+      controlRef.current = null;
+    }
+  }
+
+  // DOM cleanup for the itinerary boxes
+  const containers = document.querySelectorAll('.leaflet-routing-container');
+  containers.forEach(container => {
+    try {
+      container.remove();
+    } catch (err) {
+    }
+  });
+};
+  }, [map, start, end, mode, onRouteFound]);
+
+  return null;
 }

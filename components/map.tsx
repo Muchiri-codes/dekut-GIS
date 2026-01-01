@@ -53,7 +53,7 @@ function MapController({ center }: { center: [number, number] | null }) {
   const map = useMap();
   useEffect(() => {
     if (center) {
-      map.flyTo(center, 19, { duration: 1.5 });
+      map.flyTo(center, 17, { duration: 1.5 });
     }
   }, [center, map]);
   return null;
