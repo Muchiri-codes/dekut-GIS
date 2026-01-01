@@ -17,16 +17,22 @@ if (process.env.NODE_ENV === 'development') {
 
   if (!globalWithMongo._mongoClientPromise) {
     client = new MongoClient(uri, options);
+
+    globalWithMongo._mongoClientPromise = client.connect().then(async (client) => {
+  const dbName = "dekut_landmarks"; 
+  const db = client.db(dbName);
+  const collections = await db.listCollections().toArray();
   
-    globalWithMongo._mongoClientPromise = client.connect().then((client) => {
-      console.log('✅ MongoDB Connected Successfully (Development)');
-      return client;
-    });
+  console.log('🏠 LOCAL MONGODB CONNECTED');
+  console.log(`Database: ${dbName}`);
+  console.log('Collections:', collections.map(c => c.name));
+  
+  return client;
+});
   }
   clientPromise = globalWithMongo._mongoClientPromise;
 } else {
   client = new MongoClient(uri, options);
-  // Add .then() to log success
   clientPromise = client.connect().then((client) => {
     console.log('--- ✅ MongoDB Connected Successfully (Production) ---');
     return client;
