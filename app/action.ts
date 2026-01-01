@@ -10,7 +10,6 @@ export async function getLandmarksFromDB(query: string) {
       "buildings", 
       "parking", 
       "entrances",
-      "roads",
       "emergency_points"
     ]; 
 

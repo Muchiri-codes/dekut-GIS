@@ -16,6 +16,15 @@ interface MapProps {
   activeMode: 'walk' | 'drive' | 'cycle' | null;
   setRouteData: (data: { distance: number; duration: number }) => void;
 }
+
+if (typeof window !== 'undefined') {
+  delete (L.Icon.Default.prototype as any)._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  });
+}
 // Default Icon
 const customIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -25,7 +34,6 @@ const customIcon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-// Start Icon (Green)
 const startIcon = new L.Icon({
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -33,7 +41,7 @@ const startIcon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-// End Icon (Red)
+
 const endIcon = new L.Icon({
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
@@ -45,7 +53,7 @@ function MapController({ center }: { center: [number, number] | null }) {
   const map = useMap();
   useEffect(() => {
     if (center) {
-      map.flyTo(center, 17, { duration: 1.5 });
+      map.flyTo(center, 19, { duration: 1.5 });
     }
   }, [center, map]);
   return null;
@@ -74,7 +82,7 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
     <div style={{ height: "100%", width: "100%", position: "relative" }}>
       <MapContainer
         center={dkuCenter}
-        zoom={17}
+        zoom={19}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
       >
@@ -83,9 +91,8 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
 
-        {/* 1. CAMPUS LANDMARKS */}
         {places.map((place, index) => (
-          // Note: Using index as key if MongoDB _id isn't available, but place._id is better
+
           <Marker key={place._id || index} position={[place.lat, place.lng]} icon={customIcon}>
             <Popup>
               <strong>{place.name}</strong><br />
@@ -124,11 +131,11 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
 
         {/* Routing Logic */}
         {showRoute && startPoint && endPoint && activeMode && (
-          <RoutingMachine 
-            start={startPoint} 
+          <RoutingMachine
+            start={startPoint}
             end={endPoint}
             mode={activeMode}
-            onRouteFound={(data) => setRouteData(data)} 
+            onRouteFound={(data) => setRouteData(data)}
           />
         )}
 

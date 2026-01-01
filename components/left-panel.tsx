@@ -226,9 +226,9 @@ export default function LeftPanel({
             />
             {showStartDrop && startSuggestions.length > 0 && (
               <ul className="absolute z-50 w-full bg-slate-900 border border-slate-700 rounded-md shadow-xl mt-1 max-h-40 overflow-auto">
-                {startSuggestions.map((item) => (
+                {startSuggestions.map((item, index) => (
                   <li
-                    key={item.name}
+                   key={`${item.name}-${item.lat}-${index}`}
                     onClick={() => handleSelect(item, 'start')}
                     className="p-2 hover:bg-slate-800 cursor-pointer text-sm text-slate-200 border-b border-slate-800 last:border-0"
                   >
