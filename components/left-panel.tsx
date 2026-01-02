@@ -103,7 +103,7 @@ export default function LeftPanel({
             <div className="space-y-2">
               <label className='text-sm font-medium text-slate-400'>Start Point:</label>
               <Button onClick={handleUseMyLocation} variant="secondary" className='w-full text-xs bg-amber-500 hover:bg-amber-600 text-black'>Use My Location</Button>
-              <Input placeholder='Search start point...' value={startText} onChange={(e) => setStartText(e.target.value)} className="bg-slate-950 border-slate-700" />
+              <Input placeholder='Search start point...' value={startText} onChange={(e) => setStartText(e.target.value)} className=" border-slate-700" />
               {showStartDrop && startSuggestions.length > 0 && (
                 <ul className="absolute z-50 bg-slate-900 border border-slate-700 w-[80%] rounded-md shadow-2xl">
                   {startSuggestions.map((item, i) => <li key={i} onClick={() => handleSelect(item, 'start')} className="p-2 hover:bg-slate-800 cursor-pointer text-sm border-b border-slate-800">{item.name}</li>)}
@@ -130,7 +130,7 @@ export default function LeftPanel({
               ))}
             </div>
 
-            <Button className='w-full bg-red-600 hover:bg-red-700 py-6 font-bold' disabled={!startCoords || !destCoords || !activeMode} onClick={() => setShowRoute(true)}>
+            <Button className='w-full bg-green-600 hover:bg-green-700 py-6 font-bold' disabled={!startCoords || !destCoords || !activeMode} onClick={() => setShowRoute(true)}>
               Generate Route
             </Button>
           </CardContent>
