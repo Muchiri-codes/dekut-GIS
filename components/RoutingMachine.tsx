@@ -45,7 +45,6 @@ export default function RoutingMachine({ start, end, onRouteFound, mode }: Routi
       addWaypoints: false,
       routeWhileDragging: false,
       fitSelectedRoutes: true,
-      // @ts-ignore - Leaflet types sometimes miss this
       itineraryClassName: "hidden",
     });
 
