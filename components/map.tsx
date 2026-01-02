@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import { Dispatch, SetStateAction } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -16,6 +16,7 @@ interface MapProps {
   activeMode: 'walk' | 'drive' | 'cycle' | null;
   setRouteData: (data: { distance: number; duration: number;steps: any[]; 
     routeName: string }) => void;
+    onMapTouch: () => void;
 }
 
 if (typeof window !== 'undefined') {
@@ -50,6 +51,18 @@ const endIcon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
+function MapClickHandler({ onMapClick }: { onMapClick: () => void }) {
+  useMapEvents({
+    click: () => {
+      onMapClick();
+    },
+    dragstart: () => {
+      onMapClick(); // This also closes the menu when the user starts moving the map
+    }
+  });
+  return null;
+}
+
 function MapController({ center }: { center: [number, number] | null }) {
   const map = useMap();
   useEffect(() => {
@@ -60,7 +73,7 @@ function MapController({ center }: { center: [number, number] | null }) {
   return null;
 }
 
-export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, activeMode, setRouteData }: MapProps) {
+export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, activeMode, setRouteData, onMapTouch }: MapProps) {
   const { position } = useGeolocation();
   const dkuCenter: [number, number] = [-0.397, 36.961];
 
@@ -82,11 +95,13 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
   return (
     <div style={{ height: "100%", width: "100%", position: "relative" }}>
       <MapContainer
+      
         center={dkuCenter}
         zoom={19}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
       >
+        <MapClickHandler onMapClick={onMapTouch} />
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

@@ -36,7 +36,8 @@ export default function Home() {
 
         {/* MAP AREA */}
         <div className="flex-1 relative">
-          <Map geolocateCenter={mapCenter} startPoint={startCoords} endPoint={destCoords} showRoute={showRoute} setRouteData={handleRouteFound} activeMode={activeMode} />
+          <Map geolocateCenter={mapCenter} startPoint={startCoords} endPoint={destCoords} showRoute={showRoute} setRouteData={handleRouteFound} activeMode={activeMode}
+          onMapTouch={() => setMobileView('none')} />
 
           {/* MOBILE CONTROLS CONTAINER */}
           <div className="md:hidden absolute top-4 left-0 right-0 z-[1001] flex flex-col items-center gap-4 px-4 pointer-events-none">
