@@ -17,7 +17,7 @@ interface LeftPanelProps {
   destCoords: [number, number] | null;
   activeMode: 'walk' | 'drive' | 'cycle' | null;
   showRoute: boolean;
-  viewMode?: 'search' | 'navigator' | 'all'; // NEW PROP
+  viewMode?: 'search' | 'navigator' | 'all';
 }
 
 interface Landmark { name: string; lat: number; lng: number; }
@@ -57,9 +57,26 @@ export default function LeftPanel({
     onSearchLocation(item.lat, item.lng);
   };
 
+  // Reset logic for Clear buttons
+  const clearStart = () => {
+    setStartText("");
+    setStartCoords(null);
+    setStartSuggestions([]);
+  };
+
+  const clearDest = () => {
+    setDestText("");
+    setDestCoords(null);
+    setDestSuggestions([]);
+  };
+
   useEffect(() => {
     const delay = setTimeout(async () => {
-      if (startText.length > 1) { const res = await getLandmarksFromDB(startText); setStartSuggestions(res); setShowStartDrop(true); }
+      if (startText.length > 1 && startText !== "My Current Location") { 
+        const res = await getLandmarksFromDB(startText); 
+        setStartSuggestions(res); 
+        setShowStartDrop(true); 
+      }
       else setShowStartDrop(false);
     }, 300);
     return () => clearTimeout(delay);
@@ -67,7 +84,11 @@ export default function LeftPanel({
 
   useEffect(() => {
     const delay = setTimeout(async () => {
-      if (destText.length > 1 && !destCoords) { const res = await getLandmarksFromDB(destText); setDestSuggestions(res); setShowDestDrop(true); }
+      if (destText.length > 1 && !destCoords) { 
+        const res = await getLandmarksFromDB(destText); 
+        setDestSuggestions(res); 
+        setShowDestDrop(true); 
+      }
       else setShowDestDrop(false);
     }, 300);
     return () => clearTimeout(delay);
@@ -79,20 +100,16 @@ export default function LeftPanel({
       {(viewMode === 'all' || viewMode === 'search') && (
         <Card className="bg-green-900/30 border-green-500/40 backdrop-blur-lg shadow-xl">
           <CardHeader>
-            <CardTitle className="text-yellow-400">
-              Search Location
-            </CardTitle>
+            <CardTitle className="text-yellow-400">Search Location</CardTitle>
             <CardDescription className="text-green-100/80">
-              Search the location of any feature within dedan Kiathi university ie. ADMAT, toilets, cafeteria etc...
+              Search features within DeKUT (e.g., ADMAT, toilets, cafeteria).
             </CardDescription>
           </CardHeader>
-
           <CardContent className="flex flex-col gap-3">
             <SearchInput onLocationFound={handleLocationFound} />
             {error && <p className="text-red-400 text-xs">{error}</p>}
           </CardContent>
         </Card>
-
       )}
 
       {/* NAVIGATOR SECTION */}
@@ -100,9 +117,11 @@ export default function LeftPanel({
         <Card className="bg-green-900/30 border-green-500/40 backdrop-blur-lg shadow-xl">
           <CardHeader><CardTitle>Navigator</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
+            
+            {/* START POINT GROUP */}
+            <div className="space-y-2 relative">
               <label className='text-sm font-medium text-slate-400'>Start Point:</label>
-
+              
               <Button
                 onClick={(e) => {
                   e.stopPropagation(); 
@@ -111,7 +130,7 @@ export default function LeftPanel({
                 variant="secondary"
                 disabled={!!startCoords}
                 className={`w-full text-xs transition-all duration-300 ${startCoords
-                    ? 'bg-green-600 hover:bg-green-600 text-white cursor-default'
+                    ? 'bg-green-600 text-white cursor-default'
                     : 'bg-amber-500 hover:bg-amber-600 text-black'
                   }`}
               >
@@ -120,28 +139,64 @@ export default function LeftPanel({
                     <span className="h-2 w-2 bg-white rounded-full animate-pulse" />
                     Location Set
                   </span>
-                ) : (
-                  "Use My Location"
-                )}
+                ) : "Use My Location"}
               </Button>
-              <Input placeholder='Search start point...' value={startText} onChange={(e) => setStartText(e.target.value)} className=" border-slate-700" />
+
+              <div className="relative">
+                <Input 
+                  placeholder='Search start point...' 
+                  value={startText} 
+                  onChange={(e) => setStartText(e.target.value)} 
+                  className="border-slate-700 pr-10" 
+                />
+                {startText && (
+                  <button 
+                    onClick={clearStart}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
               {showStartDrop && startSuggestions.length > 0 && (
-                <ul className="absolute z-50 bg-slate-900 border border-slate-700 w-[80%] rounded-md shadow-2xl">
-                  {startSuggestions.map((item, i) => <li key={i} onClick={() => handleSelect(item, 'start')} className="p-2 hover:bg-slate-800 cursor-pointer text-sm border-b border-slate-800">{item.name}</li>)}
+                <ul className="absolute gap-2 z-50 bg-slate-900 border border-slate-700 w-full rounded-md shadow-2xl mt-1">
+                  {startSuggestions.map((item, i) => (
+                    <li key={i} onClick={() => handleSelect(item, 'start')} className="p-2 hover:bg-slate-800 cursor-pointer text-sm border-b border-slate-800 last:border-0">{item.name}</li>
+                  ))}
                 </ul>
               )}
             </div>
 
+            {/* DESTINATION GROUP */}
             <div className="space-y-2 relative">
               <label className='text-sm font-medium text-slate-400'>Destination:</label>
-              <Input placeholder='Search destination...' value={destText} onChange={(e) => setDestText(e.target.value)} className=" border-slate-700" />
+              <div className="relative">
+                <Input 
+                  placeholder='Search destination...' 
+                  value={destText} 
+                  onChange={(e) => setDestText(e.target.value)} 
+                  className="border-slate-700 pr-10" 
+                />
+                {destText && (
+                  <button 
+                    onClick={clearDest}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
               {showDestDrop && destSuggestions.length > 0 && (
-                <ul className="absolute z-50 bg-slate-900 border border-slate-700 w-[80%] rounded-md shadow-2xl">
-                  {destSuggestions.map((item, i) => <li key={i} onClick={() => handleSelect(item, 'dest')} className="p-2 hover:bg-slate-800 cursor-pointer text-sm border-b border-slate-800">{item.name}</li>)}
+                <ul className="absolute z-50 bg-slate-900 border border-slate-700 w-full rounded-md shadow-2xl mt-1">
+                  {destSuggestions.map((item, i) => (
+                    <li key={i} onClick={() => handleSelect(item, 'dest')} className="p-2 hover:bg-slate-800 cursor-pointer text-sm border-b border-slate-800 last:border-0">{item.name}</li>
+                  ))}
                 </ul>
               )}
             </div>
 
+            {/* MODE SELECTION */}
             <div className='grid grid-cols-3 gap-2'>
               {['walk', 'drive', 'cycle'].map((mode) => (
                 <Button key={mode} variant={activeMode === mode ? 'default' : 'outline'} className={`h-14 flex flex-col text-[10px] font-bold ${activeMode === mode ? 'bg-green-600' : 'border-slate-700'}`} onClick={() => setActiveMode(mode as any)}>
@@ -151,7 +206,7 @@ export default function LeftPanel({
               ))}
             </div>
 
-            <Button className='w-full bg-green-600 hover:bg-green-700 py-6 font-bold' disabled={!startCoords || !destCoords || !activeMode} onClick={() => setShowRoute(true)}>
+            <Button className='w-full bg-green-600 hover:bg-green-700 py-6 font-bold mt-4' disabled={!startCoords || !destCoords || !activeMode} onClick={() => setShowRoute(true)}>
               Generate Route
             </Button>
           </CardContent>
