@@ -74,7 +74,7 @@ export default function LeftPanel({
   }, [destText, destCoords]);
 
   return (
-    <div className="flex flex-col gap-4 p-2 h-[100vh] overflow-y-auto sticky top-0">
+   <div className="flex flex-col gap-4 p-2 lg:h-screen lg:sticky lg:top-0 lg:overflow-y-auto">
       {/* SEARCH SECTION */}
       {(viewMode === 'all' || viewMode === 'search') && (
         <Card className="bg-green-900/30 border-green-500/40 backdrop-blur-lg shadow-xl">
