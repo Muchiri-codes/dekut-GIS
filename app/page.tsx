@@ -37,7 +37,7 @@ export default function Home() {
         {/* MAP AREA */}
         <div className="flex-1 relative">
           <Map geolocateCenter={mapCenter} startPoint={startCoords} endPoint={destCoords} showRoute={showRoute} setRouteData={handleRouteFound} activeMode={activeMode}
-            onMapTouch={() => setMobileView('none')} />
+            />
 
           {/* MOBILE CONTROLS CONTAINER */}
           <div className="md:hidden absolute top-4 left-0 right-0 z-[1001] flex flex-col items-center gap-4 px-4 pointer-events-none">
@@ -80,29 +80,41 @@ export default function Home() {
             </AnimatePresence>
           </div>
 
-          {/* FLOATING MOBILE PANEL */}
+          {/* FLOATING MOBILE PANEL (With Close Button) */}
           <AnimatePresence>
             {mobileView !== 'none' && (
               <motion.div
-                initial={{ opacity: 0, x: -20 }} // Slides in from the left
+                initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="md:hidden absolute top-20 left-4 z-[1001] w-[75%] max-w-[300px] max-h-[70vh] overflow-y-auto bg-transparent pointer-events-auto"
+                className="md:hidden absolute top-20 left-4 z-1001 w-[80%] max-w-75 pointer-events-auto"
               >
-                <LeftPanel
-                  {...{
-                    onSearchLocation: (lat, lng) => { setMapCenter([lat, lng]); setMobileView('none') },
-                    setStartCoords,
-                    setDestCoords,
-                    setActiveMode,
-                    setShowRoute,
-                    startCoords,
-                    destCoords,
-                    activeMode,
-                    showRoute
-                  }}
-                  viewMode={mobileView}
-                />
+                {/* WINDOWS-STYLE CLOSE BUTTON */}
+                <button
+                  onClick={() => setMobileView('none')}
+                  className="absolute -top-2 -right-2 z-1002 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-slate-900 font-bold hover:bg-red-700 active:scale-90 transition-all"
+                  title="Close Panel"
+                >
+                  ✕
+                </button>
+
+                {/* THE ACTUAL PANEL */}
+                <div className="max-h-[70vh] overflow-y-auto rounded-2xl shadow-2xl bg-transparent">
+                  <LeftPanel
+                    {...{
+                      onSearchLocation: (lat, lng) => { setMapCenter([lat, lng]); setMobileView('none') },
+                      setStartCoords,
+                      setDestCoords,
+                      setActiveMode,
+                      setShowRoute,
+                      startCoords,
+                      destCoords,
+                      activeMode,
+                      showRoute
+                    }}
+                    viewMode={mobileView}
+                  />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
