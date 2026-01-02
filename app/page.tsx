@@ -2,13 +2,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import LeftPanel from '@/components/left-panel';
 import dynamic from "next/dynamic";
+import { Button } from '@/components/ui/button';
 import { RouteSummary } from '@/components/right-panel';
 import { AnimatePresence, motion } from 'framer-motion';
 import Header from '@/components/Header';
 
-const Map = dynamic(() => import("@/components/map"), {
-  ssr: false,
-});
+const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function Home() {
   const [startCoords, setStartCoords] = useState<[number, number] | null>(null);
@@ -16,129 +15,97 @@ export default function Home() {
   const [activeMode, setActiveMode] = useState<'walk' | 'drive' | 'cycle' | null>(null);
   const [showRoute, setShowRoute] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
-  const [routeData, setRouteData] = useState<{ distance: number, duration: number, steps: any[], routeName: string } | null>(null);
+  const [routeData, setRouteData] = useState<any>(null);
 
-  // --- MOBILE UI STATE ---
-  const [mobilePanel, setMobilePanel] = useState<'none' | 'search' | 'navigator'>('none');
+  // --- MOBILE UI STATES ---
+  const [mobileView, setMobileView] = useState<'none' | 'search' | 'navigator'>('none');
   const [showWelcome, setShowWelcome] = useState(true);
 
-  const handleRouteFound = useCallback((data: { distance: number; duration: number, steps: any[], routeName: string }) => {
-    setRouteData(prev => {
-      if (prev?.distance === data.distance && prev?.routeName === data.routeName) {
-        return prev;
-      }
-      return data;
-    });
-    // Auto-hide panel when route is generated on mobile
-    setMobilePanel('none');
+  // Hide welcome after 6 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setShowWelcome(false), 6000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleRouteFound = useCallback((data: any) => {
+    setRouteData(data);
+    setMobileView('none'); // HIDE PANEL ON ROUTE GENERATION
   }, []);
 
   return (
-    <div className="flex flex-col h-screen w-full bg-slate-950 overflow-hidden">
+    <div className="relative h-screen w-full bg-slate-950 overflow-hidden flex flex-col">
       <Header />
-      
-      <main className="flex flex-1 w-full overflow-hidden relative">
-        
-        {/* --- DESKTOP LEFT PANEL (Hidden on Mobile) --- */}
-        <div className="hidden md:block w-[350px] h-full border-r border-slate-800 z-20 bg-slate-900">
-          <LeftPanel
-            onSearchLocation={(lat, lng) => setMapCenter([lat, lng])}
-            setStartCoords={setStartCoords}
-            setDestCoords={setDestCoords}
-            setActiveMode={setActiveMode}
-            setShowRoute={setShowRoute}
-            startCoords={startCoords}
-            destCoords={destCoords}
-            activeMode={activeMode}
-            showRoute={showRoute}
-          />
+
+      {/* --- HUGE WELCOME OVERLAY --- */}
+      <AnimatePresence>
+        {showWelcome && (
+          <motion.div 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/60 backdrop-blur-md pointer-events-none"
+          >
+            <div className="w-full overflow-hidden">
+               <motion.h1 
+                initial={{ x: "100%" }}
+                animate={{ x: "-100%" }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                className="text-6xl md:text-9xl font-black text-yellow-400 uppercase whitespace-nowrap"
+               >
+                 WELCOME TO DEKUT NAVIGATION • YOUR CAMPUS GUIDE • EXPLORE KIMATHI • 
+               </motion.h1>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <main className="flex flex-1 relative overflow-hidden">
+        {/* DESKTOP SIDEBAR */}
+        <div className="hidden md:block w-[350px] bg-slate-900 border-r border-slate-800 z-20">
+          <LeftPanel {...{onSearchLocation: (lat, lng) => setMapCenter([lat, lng]), setStartCoords, setDestCoords, setActiveMode, setShowRoute, startCoords, destCoords, activeMode, showRoute}} viewMode="all" />
         </div>
 
-        {/* --- MAP AREA (Full screen on mobile) --- */}
-        <div className="flex-1 relative h-full w-full">
-          <Map 
-            geolocateCenter={mapCenter}
-            startPoint={startCoords}
-            endPoint={destCoords}
-            showRoute={showRoute}
-            setRouteData={handleRouteFound}
-            activeMode={activeMode}
-          />
+        {/* MAP AREA */}
+        <div className="flex-1 relative">
+          <Map geolocateCenter={mapCenter} startPoint={startCoords} endPoint={destCoords} showRoute={showRoute} setRouteData={handleRouteFound} activeMode={activeMode} />
 
-          {/* --- MOBILE TOGGLE CONTROLS (Floating) --- */}
-          <div className="md:hidden absolute top-4 left-1/2 -translate-x-1/2 z-[1001] flex gap-2 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-full shadow-2xl border border-slate-700">
-            <button 
-              onClick={() => setMobilePanel(mobilePanel === 'search' ? 'none' : 'search')}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${mobilePanel === 'search' ? 'bg-indigo-600 text-white' : 'text-slate-300'}`}
+          {/* MOBILE TOGGLE BUTTONS */}
+          <div className="md:hidden absolute top-4 left-1/2 -translate-x-1/2 z-[1001] flex gap-2">
+            <Button 
+              onClick={() => setMobileView(mobileView === 'search' ? 'none' : 'search')}
+              className={`rounded-full px-6 shadow-xl ${mobileView === 'search' ? 'bg-yellow-500 text-black' : 'bg-slate-800'}`}
             >
               🔍 Search
-            </button>
-            <button 
-              onClick={() => setMobilePanel(mobilePanel === 'navigator' ? 'none' : 'navigator')}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${mobilePanel === 'navigator' ? 'bg-indigo-600 text-white' : 'text-slate-300'}`}
+            </Button>
+            <Button 
+              onClick={() => setMobileView(mobileView === 'navigator' ? 'none' : 'navigator')}
+              className={`rounded-full px-6 shadow-xl ${mobileView === 'navigator' ? 'bg-indigo-600' : 'bg-slate-800'}`}
             >
               🚀 Navigate
-            </button>
+            </Button>
           </div>
 
-          {/* --- MOBILE FLOATING PANEL --- */}
+          {/* FLOATING MOBILE PANEL */}
           <AnimatePresence>
-            {mobilePanel !== 'none' && (
+            {mobileView !== 'none' && (
               <motion.div 
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -20, opacity: 0 }}
-                className="md:hidden absolute top-20 left-4 right-4 z-[1001] bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-4 overflow-hidden"
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+                className="md:hidden absolute top-20 left-4 right-4 z-[1001] max-h-[70vh] overflow-y-auto rounded-2xl shadow-2xl"
               >
-                <LeftPanel
-                  // On mobile, we only show the part of the panel the user toggled
-                  // You might need to adjust LeftPanel to accept a "mode" prop if needed
-                  onSearchLocation={(lat, lng) => {
-                    setMapCenter([lat, lng]);
-                    setMobilePanel('none');
-                  }}
-                  setStartCoords={setStartCoords}
-                  setDestCoords={setDestCoords}
-                  setActiveMode={setActiveMode}
-                  setShowRoute={setShowRoute}
-                  startCoords={startCoords}
-                  destCoords={destCoords}
-                  activeMode={activeMode}
-                  showRoute={showRoute}
+                <LeftPanel 
+                   {...{onSearchLocation: (lat, lng) => {setMapCenter([lat, lng]); setMobileView('none')}, setStartCoords, setDestCoords, setActiveMode, setShowRoute, startCoords, destCoords, activeMode, showRoute}} 
+                   viewMode={mobileView} 
                 />
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* --- ROUTE SUMMARY (Floating) --- */}
+          {/* ROUTE SUMMARY */}
           <AnimatePresence>
-            {showRoute && startCoords && destCoords && activeMode && routeData && (
-              <div className="absolute bottom-4 left-4 right-4 md:top-4 md:right-4 md:bottom-auto md:left-auto z-[1000] md:w-[320px]">
-                <RouteSummary
-                  start={startCoords}
-                  end={destCoords}
-                  mode={activeMode}
-                  distance={routeData.distance}
-                  duration={routeData.duration}
-                  steps={routeData.steps}
-                  routeName={routeData.routeName}
-                  onClose={() => {
-                    setShowRoute(false);
-                    setRouteData(null);
-                  }}
-                />
+            {showRoute && routeData && (
+              <div className="absolute bottom-6 left-4 right-4 md:top-4 md:right-4 md:left-auto z-[1002] md:w-80">
+                <RouteSummary {...routeData} start={startCoords} end={destCoords} mode={activeMode} onClose={() => {setShowRoute(false); setRouteData(null);}} />
               </div>
             )}
           </AnimatePresence>
-
-          {/* --- WELCOME MARQUEE (Mobile Only) --- */}
-          {showWelcome && (
-            <div className="md:hidden absolute bottom-0 left-0 w-full z-[1001] bg-indigo-600/90 backdrop-blur-sm text-white py-1 text-xs font-medium border-t border-indigo-400 pointer-events-none">
-              <div className="animate-marquee whitespace-nowrap">
-                Welcome to DeKUT Nav! 🎓 Your campus guide is ready. Find any lecture hall, office, or landmark instantly. 📍
-              </div>
-            </div>
-          )}
         </div>
       </main>
     </div>
