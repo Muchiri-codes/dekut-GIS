@@ -74,7 +74,7 @@ export default function LeftPanel({
   }, [destText, destCoords]);
 
   return (
-    <div className="flex flex-col gap-4 p-2">
+    <div className="flex flex-col gap-4 p-2 h-[100vh] overflow-y-auto sticky top-0">
       {/* SEARCH SECTION */}
       {(viewMode === 'all' || viewMode === 'search') && (
         <Card className="bg-green-900/30 border-green-500/40 backdrop-blur-lg shadow-xl">
@@ -113,7 +113,7 @@ export default function LeftPanel({
 
             <div className="space-y-2 relative">
               <label className='text-sm font-medium text-slate-400'>Destination:</label>
-              <Input placeholder='Search destination...' value={destText} onChange={(e) => setDestText(e.target.value)} className="bg-slate-950 border-slate-700" />
+              <Input placeholder='Search destination...' value={destText} onChange={(e) => setDestText(e.target.value)} className=" border-slate-700" />
               {showDestDrop && destSuggestions.length > 0 && (
                 <ul className="absolute z-50 bg-slate-900 border border-slate-700 w-[80%] rounded-md shadow-2xl">
                   {destSuggestions.map((item, i) => <li key={i} onClick={() => handleSelect(item, 'dest')} className="p-2 hover:bg-slate-800 cursor-pointer text-sm border-b border-slate-800">{item.name}</li>)}
