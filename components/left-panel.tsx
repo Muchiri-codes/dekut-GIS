@@ -74,7 +74,7 @@ export default function LeftPanel({
   }, [destText, destCoords]);
 
   return (
-   <div className="flex flex-col gap-4 p-2 lg:h-screen lg:sticky lg:top-0 lg:overflow-y-auto">
+    <div className="flex flex-col gap-4 p-2 lg:h-screen lg:sticky lg:top-0 lg:overflow-y-auto">
       {/* SEARCH SECTION */}
       {(viewMode === 'all' || viewMode === 'search') && (
         <Card className="bg-green-900/30 border-green-500/40 backdrop-blur-lg shadow-xl">
@@ -102,7 +102,28 @@ export default function LeftPanel({
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <label className='text-sm font-medium text-slate-400'>Start Point:</label>
-              <Button onClick={handleUseMyLocation} variant="secondary" className='w-full text-xs bg-amber-500 hover:bg-amber-600 text-black'>Use My Location</Button>
+
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation(); 
+                  handleUseMyLocation();
+                }}
+                variant="secondary"
+                disabled={!!startCoords}
+                className={`w-full text-xs transition-all duration-300 ${startCoords
+                    ? 'bg-green-600 hover:bg-green-600 text-white cursor-default'
+                    : 'bg-amber-500 hover:bg-amber-600 text-black'
+                  }`}
+              >
+                {startCoords ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="h-2 w-2 bg-white rounded-full animate-pulse" />
+                    Location Set
+                  </span>
+                ) : (
+                  "Use My Location"
+                )}
+              </Button>
               <Input placeholder='Search start point...' value={startText} onChange={(e) => setStartText(e.target.value)} className=" border-slate-700" />
               {showStartDrop && startSuggestions.length > 0 && (
                 <ul className="absolute z-50 bg-slate-900 border border-slate-700 w-[80%] rounded-md shadow-2xl">

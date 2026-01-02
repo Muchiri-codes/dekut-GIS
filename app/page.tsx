@@ -43,7 +43,7 @@ export default function Home() {
           <div className="md:hidden absolute top-4 left-0 right-0 z-[1001] flex flex-col items-center gap-4 px-4 pointer-events-none">
 
             {/* TOGGLE BUTTONS (Enable pointer events for buttons only) */}
-            <div className="flex gap-2 p-1 bg-slate-900/80 backdrop-blur-md rounded-full border border-slate-700/50 shadow-xl pointer-events-auto">
+            <div className="flex gap-2 p-2 bg-slate-900/80 backdrop-blur-md rounded-full border border-slate-700/50 shadow-xl pointer-events-auto">
               <button
                 onClick={() => setMobileView(mobileView === 'search' ? 'none' : 'search')}
                 className={`rounded-full px-6 py-2 text-xs font-bold transition-all ${mobileView === 'search' ? 'bg-yellow-500 text-black' : 'text-slate-300'}`}
