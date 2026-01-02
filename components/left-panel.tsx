@@ -77,7 +77,7 @@ export default function LeftPanel({
     <div className="flex flex-col gap-4 p-2">
       {/* SEARCH SECTION */}
       {(viewMode === 'all' || viewMode === 'search') && (
-        <Card className="bg-slate-900/80 border-slate-800 backdrop-blur-sm">
+        <Card className="bg-slate-200/80 border-slate-500 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-yellow-400">Search Location</CardTitle>
             <CardDescription>Search the location of any feature within dedan Kiathi university ie. ADMAT, toilets, cafeteria etc...</CardDescription>
