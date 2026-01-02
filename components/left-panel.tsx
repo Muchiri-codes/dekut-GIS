@@ -77,10 +77,10 @@ export default function LeftPanel({
     <div className="flex flex-col gap-4 p-2">
       {/* SEARCH SECTION */}
       {(viewMode === 'all' || viewMode === 'search') && (
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-slate-900/80 border-slate-800 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-yellow-400">Search Location</CardTitle>
-            <CardDescription>Find halls, offices, or hostels.</CardDescription>
+            <CardDescription>Search the location of any feature within dedan Kiathi university ie. ADMAT, toilets, cafeteria etc...</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <SearchInput onLocationFound={handleLocationFound} />
@@ -91,7 +91,7 @@ export default function LeftPanel({
 
       {/* NAVIGATOR SECTION */}
       {(viewMode === 'all' || viewMode === 'navigator') && (
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-slate-900/80 border-slate-800 backdrop-blur-sm">
           <CardHeader><CardTitle>Navigator</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">

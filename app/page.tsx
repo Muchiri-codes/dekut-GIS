@@ -39,19 +39,21 @@ export default function Home() {
       {/* --- HUGE WELCOME OVERLAY --- */}
       <AnimatePresence>
         {showWelcome && (
-          <motion.div 
+          <motion.div
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/60 backdrop-blur-md pointer-events-none"
+            // Reduced blur to 'sm' (4px) or 'md' (8px) instead of 'backdrop-blur-md'
+            className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/40 backdrop-blur-sm pointer-events-none"
           >
-            <div className="w-full overflow-hidden">
-               <motion.h1 
+            <div className="w-full overflow-hidden border-y border-yellow-400/20 bg-slate-900/50 py-4">
+              <motion.h1
                 initial={{ x: "100%" }}
                 animate={{ x: "-100%" }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                className="text-6xl md:text-9xl font-black text-yellow-400 uppercase whitespace-nowrap"
-               >
-                 WELCOME TO DEKUT NAVIGATION • YOUR CAMPUS GUIDE • EXPLORE KIMATHI • 
-               </motion.h1>
+                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                // Reduced size to text-4xl or 5xl
+                className="text-4xl md:text-6xl font-black text-yellow-400 uppercase tracking-tighter whitespace-nowrap"
+              >
+                WELCOME TO DEKUT NAVIGATION • YOUR CAMPUS GUIDE • EXPLORE KIMATHI •
+              </motion.h1>
             </div>
           </motion.div>
         )}
@@ -60,7 +62,7 @@ export default function Home() {
       <main className="flex flex-1 relative overflow-hidden">
         {/* DESKTOP SIDEBAR */}
         <div className="hidden md:block w-[350px] bg-slate-900 border-r border-slate-800 z-20">
-          <LeftPanel {...{onSearchLocation: (lat, lng) => setMapCenter([lat, lng]), setStartCoords, setDestCoords, setActiveMode, setShowRoute, startCoords, destCoords, activeMode, showRoute}} viewMode="all" />
+          <LeftPanel {...{ onSearchLocation: (lat, lng) => setMapCenter([lat, lng]), setStartCoords, setDestCoords, setActiveMode, setShowRoute, startCoords, destCoords, activeMode, showRoute }} viewMode="all" />
         </div>
 
         {/* MAP AREA */}
@@ -68,31 +70,34 @@ export default function Home() {
           <Map geolocateCenter={mapCenter} startPoint={startCoords} endPoint={destCoords} showRoute={showRoute} setRouteData={handleRouteFound} activeMode={activeMode} />
 
           {/* MOBILE TOGGLE BUTTONS */}
-          <div className="md:hidden absolute top-4 left-1/2 -translate-x-1/2 z-[1001] flex gap-2">
-            <Button 
+          <div className="md:hidden absolute top-4 left-1/2 -translate-x-1/2 z-1001 flex gap-2">
+            <Button
               onClick={() => setMobileView(mobileView === 'search' ? 'none' : 'search')}
               className={`rounded-full px-6 shadow-xl ${mobileView === 'search' ? 'bg-yellow-500 text-black' : 'bg-slate-800'}`}
             >
-              🔍 Search
+              Search
             </Button>
-            <Button 
+            <Button
               onClick={() => setMobileView(mobileView === 'navigator' ? 'none' : 'navigator')}
               className={`rounded-full px-6 shadow-xl ${mobileView === 'navigator' ? 'bg-indigo-600' : 'bg-slate-800'}`}
             >
-              🚀 Navigate
+              Navigate
             </Button>
           </div>
 
           {/* FLOATING MOBILE PANEL */}
           <AnimatePresence>
             {mobileView !== 'none' && (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
-                className="md:hidden absolute top-20 left-4 right-4 z-[1001] max-h-[70vh] overflow-y-auto rounded-2xl shadow-2xl"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                // Added 'opacity-90' or 'bg-slate-900/80' to make it semi-transparent
+                className="md:hidden absolute top-20 left-4 right-4 z-[1001] max-h-[70vh] overflow-y-auto rounded-2xl shadow-2xl bg-slate-900/90 backdrop-blur-md border border-slate-700/50"
               >
-                <LeftPanel 
-                   {...{onSearchLocation: (lat, lng) => {setMapCenter([lat, lng]); setMobileView('none')}, setStartCoords, setDestCoords, setActiveMode, setShowRoute, startCoords, destCoords, activeMode, showRoute}} 
-                   viewMode={mobileView} 
+                <LeftPanel
+                  {...{ onSearchLocation: (lat, lng) => { setMapCenter([lat, lng]); setMobileView('none') }, setStartCoords, setDestCoords, setActiveMode, setShowRoute, startCoords, destCoords, activeMode, showRoute }}
+                  viewMode={mobileView}
                 />
               </motion.div>
             )}
@@ -101,8 +106,8 @@ export default function Home() {
           {/* ROUTE SUMMARY */}
           <AnimatePresence>
             {showRoute && routeData && (
-              <div className="absolute bottom-6 left-4 right-4 md:top-4 md:right-4 md:left-auto z-[1002] md:w-80">
-                <RouteSummary {...routeData} start={startCoords} end={destCoords} mode={activeMode} onClose={() => {setShowRoute(false); setRouteData(null);}} />
+              <div className="absolute bottom-6 left-4 right-4 md:top-4 md:right-4 md:left-auto z-1002 md:w-80">
+                <RouteSummary {...routeData} start={startCoords} end={destCoords} mode={activeMode} onClose={() => { setShowRoute(false); setRouteData(null); }} />
               </div>
             )}
           </AnimatePresence>
