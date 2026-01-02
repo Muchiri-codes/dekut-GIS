@@ -71,7 +71,7 @@ export default function Home() {
                     initial={{ x: "100%" }}
                     animate={{ x: "-100%" }}
                     transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                    className="text-[10px] font-bold text-indigo-300 uppercase whitespace-nowrap"
+                    className="text-[10px] font-bold text-black uppercase whitespace-nowrap"
                   >
                     Welcome to DeKUT Nav • Select a panel above to start exploring Kimathi University 🎓
                   </motion.p>
@@ -84,8 +84,10 @@ export default function Home() {
           <AnimatePresence>
             {mobileView !== 'none' && (
               <motion.div 
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                className="md:hidden absolute top-20 left-4 right-4 z-[1001] max-h-[70vh] overflow-y-auto rounded-2xl shadow-2xl bg-slate-900/95 backdrop-blur-xl border border-slate-700/50"
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                exit={{ opacity: 0, y: 10 }}
+                className="md:hidden absolute top-20 left-4 right-4 z-1001 max-h-[70vh] overflow-y-auto bg-transparent"
               >
                 <LeftPanel 
                    {...{onSearchLocation: (lat, lng) => {setMapCenter([lat, lng]); setMobileView('none')}, setStartCoords, setDestCoords, setActiveMode, setShowRoute, startCoords, destCoords, activeMode, showRoute}} 
