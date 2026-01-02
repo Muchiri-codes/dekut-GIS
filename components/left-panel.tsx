@@ -77,21 +77,27 @@ export default function LeftPanel({
     <div className="flex flex-col gap-4 p-2">
       {/* SEARCH SECTION */}
       {(viewMode === 'all' || viewMode === 'search') && (
-        <Card className="bg-emerald-950/40 border-emerald-500/30 backdrop-blur-md shadow-2xl">
+        <Card className="bg-green-900/30 border-green-500/40 backdrop-blur-lg shadow-xl">
           <CardHeader>
-            <CardTitle className="text-yellow-400">Search Location</CardTitle>
-            <CardDescription>Search the location of any feature within dedan Kiathi university ie. ADMAT, toilets, cafeteria etc...</CardDescription>
+            <CardTitle className="text-yellow-400">
+              Search Location
+            </CardTitle>
+            <CardDescription className="text-green-100/80">
+              Search the location of any feature within dedan Kiathi university ie. ADMAT, toilets, cafeteria etc...
+            </CardDescription>
           </CardHeader>
+
           <CardContent className="flex flex-col gap-3">
             <SearchInput onLocationFound={handleLocationFound} />
-            {error && <p className="text-red-500 text-xs">{error}</p>}
+            {error && <p className="text-red-400 text-xs">{error}</p>}
           </CardContent>
         </Card>
+
       )}
 
       {/* NAVIGATOR SECTION */}
       {(viewMode === 'all' || viewMode === 'navigator') && (
-        <Card className="bg-emerald-950/40 border-emerald-500/30 backdrop-blur-md shadow-2xl">
+        <Card className="bg-green-900/30 border-green-500/40 backdrop-blur-lg shadow-xl">
           <CardHeader><CardTitle>Navigator</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
