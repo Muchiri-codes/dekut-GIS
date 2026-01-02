@@ -24,7 +24,7 @@ interface Landmark { name: string; lat: number; lng: number; }
 
 export default function LeftPanel({
   onSearchLocation, setStartCoords, setDestCoords, setActiveMode,
-  setShowRoute, startCoords, destCoords, activeMode, viewMode = 'all' 
+  setShowRoute, startCoords, destCoords, activeMode, viewMode = 'all'
 }: LeftPanelProps) {
 
   const result = useGeolocation();
@@ -77,7 +77,7 @@ export default function LeftPanel({
     <div className="flex flex-col gap-4 p-2">
       {/* SEARCH SECTION */}
       {(viewMode === 'all' || viewMode === 'search') && (
-        <Card className="bg-slate-200/80 border-slate-500 backdrop-blur-sm">
+        <Card className="bg-emerald-950/40 border-emerald-500/30 backdrop-blur-md shadow-2xl">
           <CardHeader>
             <CardTitle className="text-yellow-400">Search Location</CardTitle>
             <CardDescription>Search the location of any feature within dedan Kiathi university ie. ADMAT, toilets, cafeteria etc...</CardDescription>
@@ -91,7 +91,7 @@ export default function LeftPanel({
 
       {/* NAVIGATOR SECTION */}
       {(viewMode === 'all' || viewMode === 'navigator') && (
-        <Card className="bg-slate-900/80 border-slate-800 backdrop-blur-sm">
+        <Card className="bg-emerald-950/40 border-emerald-500/30 backdrop-blur-md shadow-2xl">
           <CardHeader><CardTitle>Navigator</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
