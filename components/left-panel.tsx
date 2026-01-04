@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { useGeolocation } from '@/hooks/UseGeolocation';
 import { SearchInput } from './SearchInput';
 import { getLandmarksFromDB } from '@/app/action';
+import { X } from 'lucide-react'; // Added for a cleaner icon
 
 interface LeftPanelProps {
   onSearchLocation: (lat: number, lng: number) => void;
@@ -95,7 +96,7 @@ export default function LeftPanel({
   }, [destText, destCoords]);
 
   return (
-    <div className="flex flex-col gap-4 p-2 lg:h-screen lg:sticky lg:top-0 lg:overflow-y-auto">
+    <div className="flex flex-col gap-4 p-2 lg:h-screen lg:sticky lg:top-0 lg:overflow-y-auto no-scrollbar">
       {/* SEARCH SECTION */}
       {(viewMode === 'all' || viewMode === 'search') && (
         <Card className="bg-green-900/30 border-green-500/40 backdrop-blur-lg shadow-xl">
@@ -115,12 +116,12 @@ export default function LeftPanel({
       {/* NAVIGATOR SECTION */}
       {(viewMode === 'all' || viewMode === 'navigator') && (
         <Card className="bg-green-900/30 border-green-500/40 backdrop-blur-lg shadow-xl">
-          <CardHeader><CardTitle>Navigator</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-white text-[16px]">Navigator</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             
-            {/* START POINT GROUP */}
+            {/* START POINT */}
             <div className="space-y-2 relative">
-              <label className='text-sm font-medium text-slate-400'>Start Point:</label>
+              <label className='text-sm font-medium text-white'>Start Point:</label>
               
               <Button
                 onClick={(e) => {
@@ -147,14 +148,14 @@ export default function LeftPanel({
                   placeholder='Search start point...' 
                   value={startText} 
                   onChange={(e) => setStartText(e.target.value)} 
-                  className="border-slate-700 pr-10" 
+                  className="border-slate-700 pr-10 text-white" 
                 />
                 {startText && (
                   <button 
                     onClick={clearStart}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white z-20 p-1.5 transition-all"
                   >
-                    ✕
+                    <X size={14} />
                   </button>
                 )}
               </div>
@@ -162,7 +163,7 @@ export default function LeftPanel({
               {showStartDrop && startSuggestions.length > 0 && (
                 <ul className="absolute gap-2 z-50 bg-slate-900 border border-slate-700 w-full rounded-md shadow-2xl mt-1">
                   {startSuggestions.map((item, i) => (
-                    <li key={i} onClick={() => handleSelect(item, 'start')} className="p-2 hover:bg-slate-800 cursor-pointer text-sm border-b border-slate-800 last:border-0">{item.name}</li>
+                    <li key={i} onClick={() => handleSelect(item, 'start')} className="p-2 hover:bg-slate-700 cursor-pointer text-sm border-b border-slate-800 last:border-0 text-white">{item.name}</li>
                   ))}
                 </ul>
               )}
@@ -170,27 +171,28 @@ export default function LeftPanel({
 
             {/* DESTINATION GROUP */}
             <div className="space-y-2 relative">
-              <label className='text-sm font-medium text-slate-400'>Destination:</label>
+              <label className='text-sm font-medium text-white'>Destination:</label>
               <div className="relative">
                 <Input 
                   placeholder='Search destination...' 
                   value={destText} 
                   onChange={(e) => setDestText(e.target.value)} 
-                  className="border-slate-700 pr-10" 
+                  className="border-slate-700 pr-10 text-white" 
                 />
                 {destText && (
                   <button 
                     onClick={clearDest}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                   >
-                    ✕
+                     <X size={14} />
                   </button>
                 )}
               </div>
               {showDestDrop && destSuggestions.length > 0 && (
-                <ul className="absolute z-50 bg-slate-900 border border-slate-700 w-full rounded-md shadow-2xl mt-1">
+                <ul className="absolute z-50 bg-slate-700 border border-slate-700 w-full rounded-md shadow-2xl mt-1">
                   {destSuggestions.map((item, i) => (
-                    <li key={i} onClick={() => handleSelect(item, 'dest')} className="p-2 hover:bg-slate-800 cursor-pointer text-sm border-b border-slate-800 last:border-0">{item.name}</li>
+                    <li key={i} 
+                    onClick={() => handleSelect(item, 'dest')} className="p-2 hover:bg-slate-800 cursor-pointer text-sm border-b border-slate-800 last:border-0 text-white">{item.name}</li>
                   ))}
                 </ul>
               )}

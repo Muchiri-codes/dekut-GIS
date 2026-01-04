@@ -32,17 +32,17 @@ export function RouteSummary({ distance, duration, start, end, mode, steps, rout
       exit={{ height: 0, opacity: 0, y: 20 }}
       className="overflow-hidden"
     >
-      <div className="relative bg-slate-900/90 border border-slate-700 rounded-xl p-4 mt-4 space-y-4 backdrop-blur-md shadow-2xl max-h-[80vh] flex flex-col">
+      <div className="relative bg-green-600/35 rounded-xl p-4 space-y-2 backdrop-blur-md shadow-2xl max-h-[80vh] flex flex-col">
         
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-3 right-3 text-slate-500 hover:text-white transition-colors z-10"
+          className="absolute top-3 right-3 text-white transition-colors z-10 bg-red-500"
         >
           <X size={18} />
         </button>
 
-        {/* 2. DYNAMIC TITLE: Using routeName if available */}
+        {/* DYNAMIC TITLE: Using routeName if available */}
         <div className="pr-6">
           <h3 className="text-yellow-400 font-bold flex items-start gap-2 leading-tight uppercase text-sm">
             <MapPin className="shrink-0 mt-0.5" size={18} /> 
@@ -50,23 +50,23 @@ export function RouteSummary({ distance, duration, start, end, mode, steps, rout
           </h3>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-slate-800/50 border border-slate-700 p-3 rounded-lg flex flex-col items-center">
+        <div className="grid gap-3">
+          <div className="bg-slate-800/50 border border-slate-700 rounded-lg flex flex-col items-center">
             <Timer className="text-blue-400 mb-1" size={20} />
             <span className="text-[10px] text-slate-400 uppercase tracking-wider">Est. Time</span>
             <span className="font-bold text-white text-lg">{displayTime} mins</span>
           </div>
 
-          <div className="bg-slate-800/50 border border-slate-700 p-3 rounded-lg flex flex-col items-center">
+          <div className="bg-slate-800/50 border border-slate-700 p-1 rounded-lg flex flex-col items-center">
             <Ruler className="text-green-400 mb-1" size={22} />
             <span className="text-[10px] text-slate-400 uppercase tracking-wider">Distance</span>
             <span className="font-bold text-white text-lg">{distanceInKm} km</span>
           </div>
         </div>
 
-        {/* 3. DIRECTIONS SECTION: Dynamic Steps from Leaflet */}
+        
         <div className="space-y-2 border-t border-slate-700 pt-3 flex-1 overflow-hidden flex flex-col">
-          <span className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
+          <span className="flex items-center gap-2 text-[10px] font-bold text-yellow-400 uppercase tracking-widest mb-1">
             <Navigation size={12} className="text-amber-500" /> Turn-by-Turn Directions
           </span>
           
@@ -84,7 +84,7 @@ export function RouteSummary({ distance, duration, start, end, mode, steps, rout
                     <p className="text-xs text-slate-200 leading-relaxed">
                       {step.text}
                     </p>
-                    <span className="text-[10px] text-slate-500 italic">
+                    <span className="text-[11px] text-black italic">
                       for {Math.round(step.distance)} meters
                     </span>
                   </div>

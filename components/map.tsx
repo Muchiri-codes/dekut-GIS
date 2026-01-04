@@ -1,12 +1,12 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, useMap, } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl, LayerGroup } from "react-leaflet";
 import { Dispatch, SetStateAction } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useGeolocation } from "@/hooks/UseGeolocation";
 import RoutingMachine from "./RoutingMachine";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 
 interface MapProps {
   geolocateCenter: [number, number] | null;
@@ -14,11 +14,10 @@ interface MapProps {
   endPoint: [number, number] | null;
   showRoute: boolean;
   activeMode: 'walk' | 'drive' | 'cycle' | null;
-  setRouteData: (data: { distance: number; duration: number;steps: any[]; 
-    routeName: string }) => void;
-  
+  setRouteData: (data: { distance: number; duration: number; steps: any[]; routeName: string }) => void;
 }
 
+// Icon Fixes
 if (typeof window !== 'undefined') {
   delete (L.Icon.Default.prototype as any)._getIconUrl;
   L.Icon.Default.mergeOptions({
@@ -27,7 +26,7 @@ if (typeof window !== 'undefined') {
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
   });
 }
-// Default Icon
+
 const customIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -43,14 +42,12 @@ const startIcon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-
 const endIcon = new L.Icon({
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
-
 
 function MapController({ center }: { center: [number, number] | null }) {
   const map = useMap();
@@ -67,6 +64,7 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
   const dkuCenter: [number, number] = [-0.397, 36.961];
 
   const [places, setPlaces] = useState<any[]>([]);
+  
   useEffect(() => {
     async function fetchLandmarks() {
       try {
@@ -84,42 +82,69 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
   return (
     <div style={{ height: "100%", width: "100%", position: "relative" }}>
       <MapContainer
-      
         center={dkuCenter}
         zoom={19}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
       >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
+        <LayersControl position="topright">
+          
+          {/* BASE LAYERS */}
+          <LayersControl.BaseLayer checked name="Street View">
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; OpenStreetMap contributors'
+            />
+          </LayersControl.BaseLayer>
 
-        {places.map((place, index) => (
+          <LayersControl.BaseLayer name="Satellite View">
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            />
+          </LayersControl.BaseLayer>
 
-          <Marker key={place._id || index} position={[place.lat, place.lng]} icon={customIcon}>
-            <Popup>
-              <strong>{place.name}</strong><br />
-              {place.description || "Campus Landmark"}
-            </Popup>
-          </Marker>
-        ))}
+          <LayersControl.BaseLayer name="Dark Mode">
+            <TileLayer
+              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            />
+          </LayersControl.BaseLayer>
 
-        {/* User Location */}
-        {position?.lat && position?.lng && (
-          <Marker position={[position.lat, position.lng]} icon={customIcon}>
-            <Popup>You are here</Popup>
-          </Marker>
-        )}
+          {/* OVERLAYS */}
+          <LayersControl.Overlay checked name="Campus Landmarks">
+            <LayerGroup>
+              {places.map((place, index) => (
+                <Marker key={place._id || index} position={[place.lat, place.lng]} icon={customIcon}>
+                  <Popup>
+                    <strong>{place.name}</strong><br />
+                    {place.description || "Campus Landmark"}
+                  </Popup>
+                </Marker>
+              ))}
+            </LayerGroup>
+          </LayersControl.Overlay>
 
-        {/* 3. SEARCH RESULT MARKER */}
+          <LayersControl.Overlay checked name="My Location">
+            <LayerGroup>
+              {position?.lat && position?.lng && (
+                <Marker position={[position.lat, position.lng]} icon={customIcon}>
+                  <Popup>You are here</Popup>
+                </Marker>
+              )}
+            </LayerGroup>
+          </LayersControl.Overlay>
+
+        </LayersControl>
+
+        {/* SEARCH RESULT MARKER */}
         {geolocateCenter && (
           <Marker position={geolocateCenter} icon={customIcon}>
             <Popup>Search Result</Popup>
           </Marker>
         )}
 
-        {/* 4. ROUTE SPECIFIC MARKERS */}
+        {/* ROUTE MARKERS */}
         {startPoint && (
           <Marker position={startPoint} icon={startIcon}>
             <Popup>Start Point</Popup>
@@ -131,7 +156,6 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
             <Popup>Destination</Popup>
           </Marker>
         )}
-
 
         {/* Routing Logic */}
         {showRoute && startPoint && endPoint && activeMode && (
