@@ -8,99 +8,73 @@ import "leaflet-routing-machine";
 interface RoutingMachineProps {
   start: [number, number];
   end: [number, number];
-  mode: 'walk' | 'drive' | 'cycle' | null;
-  onRouteFound: (data: { distance: number; duration: number; steps: any[]; 
-    routeName: string }) => void;
+  mode: "walk" | "drive" | "cycle";
+  onRouteFound: (data: {
+    distance: number;
+    duration: number;
+    steps: any[];
+    routeName: string;
+  }) => void;
 }
-
-export default function RoutingMachine({ start, end, onRouteFound, mode }: RoutingMachineProps) {
+export default function RoutingMachine({ start, end, mode, onRouteFound }: RoutingMachineProps) {
   const map = useMap();
-  const lastRouteRef = useRef<string>("");
-  const controlRef = useRef<L.Routing.Control | null>(null);
-
+  const routingControlRef = useRef<any>(null); 
   useEffect(() => {
-    if (!map || !start || !end || !mode) return;
+    if (!map || !start || !end) return;
 
-    
-    const router = L.Routing.osrmv1({
-      serviceUrl: "https://router.project-osrm.org/route/v1",
-      profile: mode === 'walk' ? 'foot' : mode === 'cycle' ? 'bicycle' : 'driving',
-    });
-
-    const routeKey = `${start.join(',')}-${end.join(',')}-${mode}`;
-
-    // Create the routing control
-    const routingControl = L.Routing.control({
-      router: router,
-      waypoints: [
-        L.latLng(start[0], start[1]),
-        L.latLng(end[0], end[1])
-      ],
+    const routingControl = (L.Routing as any).control({
+      router: L.Routing.osrmv1({
+        serviceUrl: "https://router.project-osrm.org/route/v1",
+        profile: mode === "walk" ? "foot" : mode === "cycle" ? "bicycle" : "car",
+      }),
+      waypoints: [L.latLng(start[0], start[1]), L.latLng(end[0], end[1])],
+      createMarker: () => null,
       lineOptions: {
         styles: [{ color: "#eab308", weight: 5, opacity: 0.9 }],
-        extendToWaypoints: true,
-        missingRouteTolerance: 10
+        addWaypoints: false,
       },
-      show: false,
+      show: true,
       addWaypoints: false,
-      routeWhileDragging: false,
       fitSelectedRoutes: true,
-      itineraryClassName: "hidden",
-    });
+    }).addTo(map);
 
-    controlRef.current = routingControl;
+    routingControlRef.current = routingControl;
+    routingControl.on('routesfound', (e: any) => {
 
-    try {
-      routingControl.addTo(map);
-    } catch (err) {
-      console.error("Leaflet routing attachment error:", err);
-    }
+      if (!routingControlRef.current) return;
 
-    routingControl.on('routesfound', (e) => {
       const route = e.routes[0];
-      const summary = route.summary;
-      const instructions = route.instructions; 
-      const routeName = route.name;
-      if (lastRouteRef.current !== routeKey) {
-        lastRouteRef.current = routeKey;
-        onRouteFound({
-          distance: summary.totalDistance,
-          duration: summary.totalTime,
-          steps: instructions, 
-          routeName: routeName
-        });
-      }
+      onRouteFound({
+        distance: route.summary.totalDistance,
+        duration: route.summary.totalTime,
+        steps: route.instructions || [],
+        routeName: route.name || ""
+      });
     });
 
-return () => {
-  if (controlRef.current && map) {
-    try {
-      const control = controlRef.current;
-      
-      if (control.getPlan()) {
-        control.getPlan().setWaypoints([]);
-      }
+   
+    return () => {
+      if (routingControlRef.current) {
+        const instance = routingControlRef.current;
+        routingControlRef.current = null; 
 
-      if ((map as any)._loaded) {
-        map.removeControl(control);
-      }
-    } catch (e) {
-      console.debug("Routing cleanup: Handled internal Leaflet race condition.");
-    } finally {
-      controlRef.current = null;
-    }
-  }
+        try {
+          instance.off();
+          if (instance.getRouter() && (instance.getRouter() as any).abort) {
+            (instance.getRouter() as any).abort();
+          }
+          if (instance._line) {
+            map.removeLayer(instance._line);
+            instance._line = null;
+          }
 
-  // DOM cleanup for the itinerary boxes
-  const containers = document.querySelectorAll('.leaflet-routing-container');
-  containers.forEach(container => {
-    try {
-      container.remove();
-    } catch (err) {
-    }
-  });
-};
-  }, [map, start, end, mode, onRouteFound]);
+          map.removeControl(instance);
+        } catch (err) {
+          console.debug("Cleanup handled safely");
+        }
+      }
+    };
+  }, [map, start[0], start[1], end[0], end[1], mode]);
 
   return null;
 }

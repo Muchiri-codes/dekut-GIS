@@ -14,7 +14,6 @@ interface RouteSummaryProps {
   onClose: () => void;
 }
 
-// 1. Added steps and routeName to the destructured props
 export function RouteSummary({ distance, duration, start, end, mode, steps, routeName, onClose }: RouteSummaryProps) {
   const distanceInKm = (distance / 1000).toFixed(2);
   const numDistanceKm = distance / 1000;
@@ -70,7 +69,7 @@ export function RouteSummary({ distance, duration, start, end, mode, steps, rout
             <Navigation size={12} className="text-amber-500" /> Turn-by-Turn Directions
           </span>
           
-          <div className="overflow-y-auto space-y-3 pr-2 custom-scrollbar max-h-48">
+          <div className="overflow-y-auto space-y-3 pr-2 no-scrollbar max-h-48">
             {steps && steps.length > 0 ? (
               steps.map((step, i) => (
                 <div key={i} className="flex gap-3 items-start group">

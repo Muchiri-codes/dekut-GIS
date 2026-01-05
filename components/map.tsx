@@ -1,12 +1,12 @@
 "use client";
 
 import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl, LayerGroup } from "react-leaflet";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, memo, useState, useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useGeolocation } from "@/hooks/UseGeolocation";
 import RoutingMachine from "./RoutingMachine";
-import { useState, useEffect } from "react";
+
 
 interface MapProps {
   geolocateCenter: [number, number] | null;
@@ -53,19 +53,40 @@ function MapController({ center }: { center: [number, number] | null }) {
   const map = useMap();
   useEffect(() => {
     if (center) {
-      map.flyTo(center, 17, { duration: 1.5 });
+      map.flyTo(center, 18, { duration: 1.5 });
     }
   }, [center, map]);
   return null;
 }
 
-export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, activeMode, setRouteData }: MapProps) {
+function RouteCleaner({ showRoute }: { showRoute: boolean }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!showRoute) {
+      map.eachLayer((layer: any) => {    
+        if (layer.options && (layer.options.className === 'leaflet-routing-container' || layer._isRouteLine)) {
+          map.removeLayer(layer);
+        }
+        if (layer instanceof L.Marker && !layer.getPopup()) {
+           map.removeLayer(layer);
+        }
+      });
+      const container = document.querySelector('.leaflet-routing-container');
+      if (container) container.remove();
+    }
+  }, [showRoute, map]);
+
+  return null;
+}
+ function Map({ geolocateCenter, startPoint, endPoint, showRoute, activeMode, setRouteData }: MapProps) {
   const { position } = useGeolocation();
   const dkuCenter: [number, number] = [-0.397, 36.961];
-
   const [places, setPlaces] = useState<any[]>([]);
+  const [isMounted, setIsMounted] = useState(false); // HYDRATION GUARD
   
   useEffect(() => {
+    setIsMounted(true);
     async function fetchLandmarks() {
       try {
         const response = await fetch('/api/landmarks');
@@ -78,15 +99,16 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
     }
     fetchLandmarks();
   }, []);
-
+ if (!isMounted) return <div className="h-full w-full bg-slate-900" />;
   return (
     <div style={{ height: "100%", width: "100%", position: "relative" }}>
       <MapContainer
         center={dkuCenter}
-        zoom={19}
+        zoom={20}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
       >
+        <RouteCleaner showRoute={showRoute} />
         <LayersControl position="topright">
           
           {/* BASE LAYERS */}
@@ -144,10 +166,10 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
           </Marker>
         )}
 
-        {/* ROUTE MARKERS */}
+    
         {startPoint && (
           <Marker position={startPoint} icon={startIcon}>
-            <Popup>Start Point</Popup>
+            <Popup>Start</Popup>
           </Marker>
         )}
 
@@ -163,7 +185,7 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
             start={startPoint}
             end={endPoint}
             mode={activeMode}
-            onRouteFound={(data) => setRouteData(data)}
+            onRouteFound={(data) => setRouteData(data as any)}
           />
         )}
 
@@ -172,3 +194,6 @@ export default function Map({ geolocateCenter, startPoint, endPoint, showRoute, 
     </div>
   );
 }
+
+
+export default memo(Map);

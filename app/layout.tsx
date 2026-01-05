@@ -23,7 +23,6 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Dekut navigation",
   description: "Help students and visitors navigate dekut with ease",
-  themeColor: "#4F46E5", // optional, but useful for PWA
 };
 
 export default function RootLayout({
