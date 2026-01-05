@@ -37,8 +37,8 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         {/* Theme color for mobile browsers */}
         <meta name="theme-color" content="#4F46E5" />
-        {/* iOS home screen icon */}
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+       
+        <link rel="apple-touch-icon" href="/icons/iconone.png" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

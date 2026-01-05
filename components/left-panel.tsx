@@ -102,7 +102,7 @@ export default function LeftPanel({
       
         {(viewMode === 'all' || viewMode === 'search') && (
           <Card className="bg-green-900/30 backdrop-blur-lg relative border-none">
-            <DragResizeContainer>
+           
             <CardHeader>
               <CardTitle className="text-yellow-400">Search Location</CardTitle>
               <CardDescription className="text-white">
@@ -113,7 +113,7 @@ export default function LeftPanel({
               <SearchInput onLocationFound={handleLocationFound} />
               {error && <p className="text-red-400 text-xs">{error}</p>}
             </CardContent>
-            </DragResizeContainer>
+  
           </Card>
         )}
       
