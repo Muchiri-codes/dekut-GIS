@@ -97,7 +97,7 @@ export default function LeftPanel({
   }, [destText, destCoords]);
   console.log({ start: startCoords, dest: destCoords, mode: activeMode });
   return (
-    <div className="flex flex-col gap-4 p-2 lg:sticky lg:top-0 overflow-y-auto no-scrollbar h-full">
+    <div className="flex flex-col gap-4 p-2 lg:sticky lg:top-0 overflow-y-auto no-scrollbar md:h-full">
       {/* SEARCH SECTION */}
       
         {(viewMode === 'all' || viewMode === 'search') && (
