@@ -38,8 +38,6 @@ export default function CornerResizeContainer({
       className={`relative touch-none ${originClass}`}
     >
       {children}
-
-      {/* Resize handle */}
       <div
         className={`absolute ${handleClass}
           w-8 h-8 rounded-full
@@ -58,7 +56,7 @@ export default function CornerResizeContainer({
           const dx = t.clientX - start.current.x;
           const dy = start.current.y - t.clientY;
 
-          const diagonal = (dx + dy) / 2;
+          const diagonal = -(dx + dy) / 2;
           const sensitivity = 0.0025;
 
           let nextScale = startScale.current + diagonal * sensitivity;

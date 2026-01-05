@@ -99,9 +99,10 @@ export default function LeftPanel({
   return (
     <div className="flex flex-col gap-4 p-2 lg:h-screen lg:sticky lg:top-0 lg:overflow-y-auto no-scrollbar">
       {/* SEARCH SECTION */}
-      <DragResizeContainer>
+      
         {(viewMode === 'all' || viewMode === 'search') && (
-          <Card className="bg-green-900/30 backdrop-blur-lg shadow-xl">
+          <Card className="bg-green-900/30 backdrop-blur-lg relative border-none">
+            <DragResizeContainer>
             <CardHeader>
               <CardTitle className="text-yellow-400">Search Location</CardTitle>
               <CardDescription className="text-white">
@@ -112,14 +113,15 @@ export default function LeftPanel({
               <SearchInput onLocationFound={handleLocationFound} />
               {error && <p className="text-red-400 text-xs">{error}</p>}
             </CardContent>
+            </DragResizeContainer>
           </Card>
         )}
-      </DragResizeContainer>
+      
 
       {/* NAVIGATOR SECTION */}
       <DragResizeContainer>
         {(viewMode === 'all' || viewMode === 'navigator') && (
-          <Card className="bg-green-900/30 border-green-500/40 backdrop-blur-lg shadow-xl">
+          <Card className="bg-green-900/30 border-green backdrop-blur-lg">
             <CardHeader><CardTitle className="text-white text-[16px]">Navigator</CardTitle></CardHeader>
             <CardContent className="space-y-4">
 

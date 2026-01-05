@@ -107,7 +107,7 @@ export default function Home() {
                 exit={{ opacity: 0, y: 10 }}
                 className="md:hidden absolute top-20 left-4 z-1005 w-[90%] max-w-75 pointer-events-auto"
               >
-                <div className="relative md:bg-slate-900 rounded-2xl shadow-2xl border md:border-slate-700 overflow-hidden">
+                <div className="relative md:bg-slate-900 rounded-2xl shadow-2xl md:border-slate-700 overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setMobileView('none')}
@@ -147,9 +147,9 @@ export default function Home() {
               >
                 <div className="rounded-2xl shadow-2xl backdrop-blur-xl border overflow-hidden ">
                   <CornerResizeContainer
-                    anchor="top-left"
-                    handlePosition="bottom-right"
-                    icon="↖"
+                    anchor="top-right"
+                    handlePosition="bottom-left"
+                    icon="↗"
                   >
                   <RouteSummary
                     {...routeData}
