@@ -1,6 +1,8 @@
 import { SiNextdotjs, SiTailwindcss, SiLeaflet, SiFramer } from 'react-icons/si';
 
-export default function Footer() {
+interface FooterProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+export default function Footer({ className, ...props }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
