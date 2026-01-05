@@ -116,7 +116,7 @@ export default function Home() {
                     ✕
                   </button>
 
-                  <div className="max-h-[60vh] overflow-y-auto p-1">
+                  <div className="h-screen overflow-y-auto p-1">
                     <LeftPanel
                       onSearchLocation={handleSearch}
                       setStartCoords={setStartCoords}
