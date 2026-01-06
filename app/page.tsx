@@ -149,7 +149,7 @@ export default function Home() {
                   handlePosition="bottom-left"
                   icon="↗"
                 >
-                  <div className="rounded-2xl shadow-2xl backdrop-blur-xl border overflow-hidden ">
+                  <div className="rounded-2xl shadow-2xl backdrop-blur-sm border overflow-hidden ">
 
                     <RouteSummary
                       {...routeData}

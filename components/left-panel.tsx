@@ -7,7 +7,7 @@ import { useGeolocation } from '@/hooks/UseGeolocation';
 import { SearchInput } from './SearchInput';
 import { getLandmarksFromDB } from '@/app/action';
 import DragResizeContainer from './DragContainer';
-import { X } from 'lucide-react'; // Added for a cleaner icon
+import { X } from 'lucide-react'; 
 
 interface LeftPanelProps {
   onSearchLocation: (lat: number, lng: number) => void;
@@ -97,11 +97,11 @@ export default function LeftPanel({
   }, [destText, destCoords]);
   console.log({ start: startCoords, dest: destCoords, mode: activeMode });
   return (
-    <div className="flex flex-col gap-4 p-2 lg:sticky lg:top-0 overflow-y-auto no-scrollbar md:h-full">
+    <div className="flex flex-col gap-4 p-0  lg:sticky lg:top-0 overflow-y-auto no-scrollbar md:h-full">
       {/* SEARCH SECTION */}
       
         {(viewMode === 'all' || viewMode === 'search') && (
-          <Card className="bg-green-900/30 backdrop-blur-lg relative border-none">
+          <Card className="bg-green-900/50  shadow-xl relative border-none">
            
             <CardHeader>
               <CardTitle className="text-yellow-400">Search Location</CardTitle>
@@ -121,7 +121,7 @@ export default function LeftPanel({
       {/* NAVIGATOR SECTION */}
       <DragResizeContainer>
         {(viewMode === 'all' || viewMode === 'navigator') && (
-          <Card className="bg-green-900/30 border-green backdrop-blur-lg">
+          <Card className="bg-green-900/40 border-none m-0 backdrop-blur-sm">
             <CardHeader><CardTitle className="text-white text-[16px]">Navigator</CardTitle></CardHeader>
             <CardContent className="space-y-4">
 
