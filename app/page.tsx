@@ -143,23 +143,25 @@ export default function Home() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                className="absolute top-20 right-4 z-1002 w-[85%] max-w-72"
+                className="absolute top-2 right-4 z-1002 w-[85%] max-w-72"
               >
-                <div className="rounded-2xl shadow-2xl backdrop-blur-xl border overflow-hidden ">
-                  <CornerResizeContainer
-                    anchor="top-right"
-                    handlePosition="bottom-left"
-                    icon="↗"
-                  >
-                  <RouteSummary
-                    {...routeData}
-                    start={startCoords}
-                    end={destCoords}
-                    mode={activeMode}
-                    onClose={handleClearRoute}
-                  />
-                  </CornerResizeContainer>
-                </div>
+                <CornerResizeContainer
+                  anchor="top-right"
+                  handlePosition="bottom-left"
+                  icon="↗"
+                >
+                  <div className="rounded-2xl shadow-2xl backdrop-blur-xl border overflow-hidden ">
+
+                    <RouteSummary
+                      {...routeData}
+                      start={startCoords}
+                      end={destCoords}
+                      mode={activeMode}
+                      onClose={handleClearRoute}
+                    />
+
+                  </div>
+                </CornerResizeContainer>
               </motion.div>
             )}
           </AnimatePresence>
