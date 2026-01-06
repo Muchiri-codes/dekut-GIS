@@ -35,12 +35,12 @@ export default function CornerResizeContainer({
   return (
     <motion.div
       style={{ scale }}
-      className={`relative touch-none w-fit h-fit ${originClass}`}
+      className={`relative touch-none w-full h-fit ${originClass}`}
     >
       {children}
       <div
         className={`absolute ${handleClass}
-          w-8 h-8 rounded-full
+          w-8 h-8 rounded-full md:hidden
           bg-slate-800 border shadow-lg 
           flex items-center justify-center z-50
           text-white text-xs select-none`}
