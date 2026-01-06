@@ -30,8 +30,8 @@ export default function RoutingMachine({ start, end, mode, onRouteFound }: Routi
       waypoints: [L.latLng(start[0], start[1]), L.latLng(end[0], end[1])],
       createMarker: () => null,
       lineOptions: {
-        styles: [{ color: "#blue", weight: 4, opacity: 0.9 }],
-        addWaypoints: true,
+        styles: [{ color: " #1e40af", weight: 4, opacity: 0.9 }],
+        addWaypoints: false,
       },
       show: true,
       addWaypoints: false,
