@@ -116,7 +116,7 @@ export default function Home() {
                     ✕
                   </button>
 
-                  <div className="h-screen overflow-y-auto p-1">
+                  
                     <LeftPanel
                       onSearchLocation={handleSearch}
                       setStartCoords={setStartCoords}
@@ -130,7 +130,6 @@ export default function Home() {
                       // Crucial: passing "all" or specific mode correctly
                       viewMode={mobileView}
                     />
-                  </div>
                 </div>
               </motion.div>
             )}

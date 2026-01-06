@@ -77,10 +77,10 @@ export function RouteSummary({ distance, duration, start, end, mode, steps, rout
                     <div className="w-5 h-5 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-mono group-hover:border-amber-500 group-hover:text-amber-500 transition-colors">
                       {i + 1}
                     </div>
-                    {i !== steps.length - 1 && <div className="w-[1px] h-full bg-slate-700 mt-1" />}
+                    {i !== steps.length - 1 && <div className="w-1px h-full bg-slate-700 mt-1" />}
                   </div>
                   <div className="flex flex-col pb-2">
-                    <p className="text-xs text-slate-200 leading-relaxed">
+                    <p className="text-xs text-white leading-relaxed">
                       {step.text}
                     </p>
                     <span className="text-[11px] text-black italic">
