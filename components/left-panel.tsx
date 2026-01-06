@@ -101,7 +101,7 @@ export default function LeftPanel({
       {/* SEARCH SECTION */}
       
         {(viewMode === 'all' || viewMode === 'search') && (
-          <Card className="bg-green-900/50  shadow-xl relative border-none">
+          <Card className="bg-green-900/90  shadow-none relative border-none backdrop-blur-none">
            
             <CardHeader>
               <CardTitle className="text-yellow-400">Search Location</CardTitle>
