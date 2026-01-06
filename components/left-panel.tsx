@@ -121,8 +121,10 @@ export default function LeftPanel({
       {/* NAVIGATOR SECTION */}
       <DragResizeContainer>
         {(viewMode === 'all' || viewMode === 'navigator') && (
-          <Card className="bg-green-900/40 border-none m-0 backdrop-blur-sm">
-            <CardHeader><CardTitle className="text-white text-[16px]">Navigator</CardTitle></CardHeader>
+          <Card className="bg-green-900/40 border-none backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-white text-[16px]">Navigator</CardTitle>
+            </CardHeader>
             <CardContent className="space-y-4">
 
               {/* START POINT */}

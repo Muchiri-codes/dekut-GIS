@@ -31,7 +31,7 @@ export function RouteSummary({ distance, duration, start, end, mode, steps, rout
       exit={{ height: 0, opacity: 0, y: 20 }}
       className="overflow-hidden"
     >
-      <div className="relative bg-green-600/35 rounded-xl p-4 space-y-2 backdrop-blur-md shadow-2xl max-h-[80vh] flex flex-col">
+      <div className=" bg-green-900/40 rounded-xl p-4 space-y-2 backdrop-blur-sm border-none max-h-[80vh] flex flex-col">
         
         {/* Close Button */}
         <button 
