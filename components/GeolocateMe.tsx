@@ -63,7 +63,7 @@ export function GeolocateButton({ onLocate, className }: Props) {
         disabled={loading}
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
-        <span className="ml-2">{loading ? "Locating..." : "Use My Location"}</span>
+        <span className="ml-2">{loading ? "Locating..." : "Geolocate Me"}</span>
       </Button>
 
       {error && (
