@@ -7,7 +7,9 @@ import { useGeolocation } from '@/hooks/UseGeolocation';
 import { SearchInput } from './SearchInput';
 import { getLandmarksFromDB } from '@/app/action';
 import DragResizeContainer from './DragContainer';
-import { X } from 'lucide-react'; 
+import { X } from 'lucide-react';
+import { GeolocateButton } from './GeolocateMe';
+
 
 interface LeftPanelProps {
   onSearchLocation: (lat: number, lng: number) => void;
@@ -99,10 +101,11 @@ export default function LeftPanel({
   return (
     <div className="flex flex-col gap-4 p-0  lg:sticky lg:top-0 overflow-y-auto no-scrollbar md:h-full">
       {/* SEARCH SECTION */}
-      
-        {(viewMode === 'all' || viewMode === 'search') && (
+
+      {(viewMode === 'all' || viewMode === 'search') && (
+        <>
           <Card className="bg-green-900/90  shadow-none relative border-none backdrop-blur-none">
-           
+
             <CardHeader>
               <CardTitle className="text-yellow-400">Search Location</CardTitle>
               <CardDescription className="text-white">
@@ -111,12 +114,27 @@ export default function LeftPanel({
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               <SearchInput onLocationFound={handleLocationFound} />
+              <div className="pt-2 border-t border-white/10">
+                <GeolocateButton onLocate={onSearchLocation} />
+              </div>
               {error && <p className="text-red-400 text-xs">{error}</p>}
+
+
+
             </CardContent>
-  
           </Card>
-        )}
-      
+          <div className="hidden lg:block mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
+            <h4 className="text-white text-xs font-bold mb-3 uppercase tracking-widest opacity-70">
+              Map Tools
+            </h4>
+            <div className="flex flex-col gap-4">
+              <GeolocateButton onLocate={onSearchLocation} />
+            </div>
+          </div>
+
+        </>
+      )}
+
 
       {/* NAVIGATOR SECTION */}
       <DragResizeContainer>

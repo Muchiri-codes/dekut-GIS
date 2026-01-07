@@ -144,3 +144,17 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;                /* Chrome / Safari */
 }
+.leaflet-tooltip {
+  background-color: rgba(15, 23, 42, 0.8) !important; /* slate-900 with opacity */
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+}
+
+/* Removes the little arrow tail for a cleaner look */
+.leaflet-tooltip-top:before {
+  border-top-color: transparent !important;
+}

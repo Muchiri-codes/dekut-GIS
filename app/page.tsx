@@ -7,6 +7,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer'
 import CornerResizeContainer from '@/components/DragContainer';
+import { GeolocateButton } from '@/components/GeolocateMe';
+
 
 const Map = dynamic(() => import("@/components/map"), {
   ssr: false,
@@ -19,7 +21,6 @@ export default function Home() {
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
   const [startCoords, setStartCoords] = useState<[number, number] | null>(null);
   const [destCoords, setDestCoords] = useState<[number, number] | null>(null);
   const [activeMode, setActiveMode] = useState<'walk' | 'drive' | 'cycle' | null>(null);
@@ -78,22 +79,45 @@ export default function Home() {
           />
 
           {/* MOBILE TOGGLE BUTTONS */}
-          <div className="md:hidden absolute top-4 left-0 right-0 z-[1001] flex flex-col items-center gap-4 px-4 pointer-events-none">
-            <div className="flex gap-2 p-2 bg-slate-900/90 backdrop-blur-md rounded-full border border-slate-700/50 shadow-xl pointer-events-auto">
+
+          <div className="md:hidden absolute top-20 left-4 z-[1001] flex flex-col gap-4 pointer-events-none">
+
+            {/* ROW 1: View Toggles (Search & Navigate) */}
+            <div className="flex flex-col gap-3 pointer-events-auto">
               <button
                 type="button"
                 onClick={() => setMobileView(mobileView === 'search' ? 'none' : 'search')}
-                className={`rounded-full px-6 py-2 text-xs font-bold transition-all ${mobileView === 'search' ? 'bg-yellow-500 text-black' : 'text-slate-300 hover:bg-slate-800'}`}
+                className={`h-12 px-5 flex items-center justify-center rounded-2xl text-xs font-bold transition-all shadow-xl border backdrop-blur-md ${mobileView === 'search'
+                  ? 'bg-yellow-500 text-black border-yellow-400'
+                  : 'bg-slate-900/90 text-slate-300 border-slate-700/50'
+                  }`}
               >
                 Search
               </button>
+
               <button
                 type="button"
                 onClick={() => setMobileView(mobileView === 'navigator' ? 'none' : 'navigator')}
-                className={`rounded-full px-6 py-2 text-xs font-bold transition-all ${mobileView === 'navigator' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800'}`}
+                className={`h-12 px-5 rounded-2xl text-xs font-bold transition-all shadow-xl border backdrop-blur-md ${mobileView === 'navigator'
+                  ? 'bg-indigo-600 text-white border-indigo-500'
+                  : 'bg-slate-900/90 text-slate-300 border-slate-700/50'
+                  }`}
               >
                 Navigate
               </button>
+            </div>
+
+           
+            <div className="flex flex-row gap-3 pointer-events-auto">
+
+              <div className="shadow-xl rounded-2xl overflow-hidden">
+                <GeolocateButton 
+               
+                onLocate={handleSearch} />
+              </div>
+
+              <div className="shadow-xl rounded-2xl overflow-hidden">
+              </div>
             </div>
           </div>
 
@@ -116,20 +140,20 @@ export default function Home() {
                     ✕
                   </button>
 
-                  
-                    <LeftPanel
-                      onSearchLocation={handleSearch}
-                      setStartCoords={setStartCoords}
-                      setDestCoords={setDestCoords}
-                      setActiveMode={setActiveMode}
-                      setShowRoute={setShowRoute}
-                      startCoords={startCoords}
-                      destCoords={destCoords}
-                      activeMode={activeMode}
-                      showRoute={showRoute}
-                      // Crucial: passing "all" or specific mode correctly
-                      viewMode={mobileView}
-                    />
+
+                  <LeftPanel
+                    onSearchLocation={handleSearch}
+                    setStartCoords={setStartCoords}
+                    setDestCoords={setDestCoords}
+                    setActiveMode={setActiveMode}
+                    setShowRoute={setShowRoute}
+                    startCoords={startCoords}
+                    destCoords={destCoords}
+                    activeMode={activeMode}
+                    showRoute={showRoute}
+                    // Crucial: passing "all" or specific mode correctly
+                    viewMode={mobileView}
+                  />
                 </div>
               </motion.div>
             )}

@@ -1,7 +1,7 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl, LayerGroup } from "react-leaflet";
-import { Dispatch, SetStateAction, memo, useState, useEffect } from "react";
+import { MapContainer,Tooltip, TileLayer, Marker, Popup, useMap, LayersControl, LayerGroup } from "react-leaflet";
+import { memo, useState, useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useGeolocation } from "@/hooks/UseGeolocation";
@@ -15,6 +15,7 @@ interface MapProps {
   showRoute: boolean;
   activeMode: 'walk' | 'drive' | 'cycle' | null;
   setRouteData: (data: { distance: number; duration: number; steps: any[]; routeName: string }) => void;
+  setMapInstance?: (map: L.Map) => void;
 }
 
 // Icon Fixes
@@ -53,7 +54,7 @@ function MapController({ center }: { center: [number, number] | null }) {
   const map = useMap();
   useEffect(() => {
     if (center) {
-      map.flyTo(center, 18, { duration: 1.5 });
+      map.flyTo(center, 17, { duration: 1.5, easeLinearity: 0.25 });
     }
   }, [center, map]);
   return null;
@@ -64,12 +65,12 @@ function RouteCleaner({ showRoute }: { showRoute: boolean }) {
 
   useEffect(() => {
     if (!showRoute) {
-      map.eachLayer((layer: any) => {    
+      map.eachLayer((layer: any) => {
         if (layer.options && (layer.options.className === 'leaflet-routing-container' || layer._isRouteLine)) {
           map.removeLayer(layer);
         }
         if (layer instanceof L.Marker && !layer.getPopup()) {
-           map.removeLayer(layer);
+          map.removeLayer(layer);
         }
       });
       const container = document.querySelector('.leaflet-routing-container');
@@ -79,12 +80,13 @@ function RouteCleaner({ showRoute }: { showRoute: boolean }) {
 
   return null;
 }
- function Map({ geolocateCenter, startPoint, endPoint, showRoute, activeMode, setRouteData }: MapProps) {
+
+function Map({ geolocateCenter, startPoint, endPoint, showRoute, activeMode, setRouteData }: MapProps) {
   const { position } = useGeolocation();
   const dkuCenter: [number, number] = [-0.397, 36.961];
   const [places, setPlaces] = useState<any[]>([]);
   const [isMounted, setIsMounted] = useState(false); // HYDRATION GUARD
-  
+
   useEffect(() => {
     setIsMounted(true);
     async function fetchLandmarks() {
@@ -99,18 +101,18 @@ function RouteCleaner({ showRoute }: { showRoute: boolean }) {
     }
     fetchLandmarks();
   }, []);
- if (!isMounted) return <div className="h-full w-full bg-slate-900" />;
+  if (!isMounted) return <div className="h-full w-full bg-slate-900" />;
   return (
     <div style={{ height: "100%", width: "100%", position: "relative" }}>
       <MapContainer
         center={dkuCenter}
-        zoom={20}
+        zoom={16}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
       >
         <RouteCleaner showRoute={showRoute} />
         <LayersControl position="topright">
-          
+
           {/* BASE LAYERS */}
           <LayersControl.BaseLayer checked name="Street View">
             <TileLayer
@@ -138,6 +140,14 @@ function RouteCleaner({ showRoute }: { showRoute: boolean }) {
             <LayerGroup>
               {places.map((place, index) => (
                 <Marker key={place._id || index} position={[place.lat, place.lng]} icon={customIcon}>
+                  <Tooltip
+                    permanent
+                    direction="top"
+                    offset={[0, -40]}
+                    className="bg-slate-900 border-none shadow-none text-white font-bold rounded-md px-2 py-1 opacity-90"
+                  >
+                    {place.name}
+                  </Tooltip>
                   <Popup>
                     <strong>{place.name}</strong><br />
                     {place.description || "Campus Landmark"}
@@ -166,7 +176,7 @@ function RouteCleaner({ showRoute }: { showRoute: boolean }) {
           </Marker>
         )}
 
-    
+
         {startPoint && (
           <Marker position={startPoint} icon={startIcon}>
             <Popup>Start</Popup>
