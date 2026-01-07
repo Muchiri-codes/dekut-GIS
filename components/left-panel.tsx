@@ -101,6 +101,7 @@ export default function LeftPanel({
   return (
     <div className="flex flex-col gap-4 p-0  lg:sticky lg:top-0 overflow-y-auto no-scrollbar md:h-full">
       {/* SEARCH SECTION */}
+    
 
       {(viewMode === 'all' || viewMode === 'search') && (
         <>
@@ -114,32 +115,29 @@ export default function LeftPanel({
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               <SearchInput onLocationFound={handleLocationFound} />
-              <div className="pt-2 border-t border-white/10">
-                <GeolocateButton onLocate={onSearchLocation} />
-              </div>
-              {error && <p className="text-red-400 text-xs">{error}</p>}
-
-
-
             </CardContent>
           </Card>
-          <div className="hidden lg:block mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
+          <div className="hidden md:block p-4 bg-white/5 mx-1 rounded-xl border border-white/10">
             <h4 className="text-white text-xs font-bold mb-3 uppercase tracking-widest opacity-70">
               Map Tools
             </h4>
             <div className="flex flex-col gap-4">
               <GeolocateButton onLocate={onSearchLocation} />
+              {error && <p className="text-red-400 text-xs z-50">{error}</p>}
             </div>
+            
           </div>
 
         </>
       )}
+      
 
 
       {/* NAVIGATOR SECTION */}
-      <DragResizeContainer>
+     
         {(viewMode === 'all' || viewMode === 'navigator') && (
-          <Card className="sm:bg-green-900/40 border-none backdrop-blur-sm relative">
+           <DragResizeContainer>
+         <Card className="bg-green-900/40 border-none backdrop-blur-sm relative">
             <CardHeader>
               <CardTitle className="text-white text-[16px]">Navigator</CardTitle>
             </CardHeader>
@@ -239,8 +237,9 @@ export default function LeftPanel({
               </Button>
             </CardContent>
           </Card>
+           </DragResizeContainer>
         )}
-      </DragResizeContainer>
+     
     </div>
   );
 }

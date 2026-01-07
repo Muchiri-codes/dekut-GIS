@@ -109,14 +109,9 @@ export default function Home() {
 
            
             <div className="flex flex-row gap-3 pointer-events-auto">
-
-              <div className="shadow-xl rounded-2xl overflow-hidden">
+              <div className="shadow-xl rounded-2xl">
                 <GeolocateButton 
-               
                 onLocate={handleSearch} />
-              </div>
-
-              <div className="shadow-xl rounded-2xl overflow-hidden">
               </div>
             </div>
           </div>
